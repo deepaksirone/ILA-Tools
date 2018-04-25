@@ -11,6 +11,8 @@ namespace ila {
 
 // TODO
 
+void foo(const InstrLvlAbsPtr m, const size_t& i);
+
 } // namespace ila
 
 #endif // VERILOG_EXPORT_H__
