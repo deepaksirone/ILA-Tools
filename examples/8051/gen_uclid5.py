@@ -15,7 +15,7 @@ def readhex(filename):
             if len(line) == 0:
                 continue
             if line[0] != ':':
-                print filename, line
+                print (filename, line)
             assert line[0] == ':'
             line = line[1:]
             length_str = line[:2]
@@ -48,6 +48,13 @@ def readhex(filename):
                 data[i] = 0
 
     return data
+
+stage = 0
+def stage_print(description):
+    global stage
+    stage += 1
+    msg = ('Stage #%d: %s') % (stage, description)
+    print (msg)
 
 def import_8051_ila(enable_ps):
     model = ila.Abstraction("oc8051")
@@ -114,23 +121,23 @@ def import_8051_ila(enable_ps):
         reg = model.getreg(r)
         zero = model.const(0, reg.type.bitwidth)
         model.set_init(r, zero)
-    print 'Finished importing 8051 ASTs.'
-    return model
+    stage_print ('Finished importing 8051 ASTs.')
+    return (model, rom)
 
 def gen_uclid5(hexfile, enable_ps):
-    model = import_8051_ila(enable_ps)
+    (model, rom) = import_8051_ila(enable_ps)
 
     data = readhex(hexfile)
     romvalue = ila.MemValues(16, 8, 0xff)
     for a, d in enumerate(data):
-        print '0x%04x -> 0x%02x' % (a, d)
+        #print '0x%04x -> 0x%02x' % (a, d)
         romvalue[a] = d
     romconst = model.const(romvalue)
     model.set_init('ROM', romconst)
-    model.set_next('ROM', romconst)
-    print 'Set ROM initial value.'
+    model.set_next('ROM', rom)
+    stage_print ('Set ROM initial value.')
 
-    model.toBoogie("test")
+    model.toUclid5("test")
 
 def main():
     parser = argparse.ArgumentParser()

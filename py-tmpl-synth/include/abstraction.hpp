@@ -274,6 +274,8 @@ namespace ila
 
         // convert this abstraction to boogie.
         void toBoogie(const std::string& filename);
+        // conver this abstraction to uclid5.
+        void toUclid5(const std::string& filename);
 
         // convert this abstraction to horn clauses.
         void hornifyAll(const std::string& fileName);
@@ -332,6 +334,7 @@ namespace ila
 
         friend class Synthesizer;
         friend class BoogieTranslator;
+        friend class Uclid5Translator;
         friend unsigned DetermineUnrollBound( Abstraction * pAbs, const std::string & nodeName);
         friend class MicroUnroller;
 
@@ -755,6 +758,11 @@ namespace ila
         void toBoogie(const std::string& name)
         {
             abs->toBoogie(name);
+        }
+
+        void toUclid5(const std::string& name)
+        {
+            abs->toUclid5(name);
         }
 
         void hornifyAll(const std::string& name)

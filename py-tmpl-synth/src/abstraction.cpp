@@ -10,6 +10,7 @@
 #include <VerilogExport.hpp>
 #include <exportSMT.hpp>
 #include <boogie.hpp>
+#include <uclid5.hpp>
 #include <horn.hpp>
 
 #include <boost/multiprecision/cpp_int.hpp>
@@ -926,6 +927,13 @@ namespace ila
     {
         BoogieTranslator bt(this);
         bt.translate();
+    }
+
+    // ---------------------------------------------------------------------- //
+    void Abstraction::toUclid5(const std::string& name)
+    {
+        Uclid5Translator ut(this);
+        ut.translate();
     }
 
     // ---------------------------------------------------------------------- //

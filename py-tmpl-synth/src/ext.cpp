@@ -436,6 +436,8 @@ BOOST_PYTHON_MODULE(ila)
         .def("areEqualUnrolled", &AbstractionWrapper::areEqualUnrolled)
         // boogie
         .def("toBoogie", &AbstractionWrapper::toBoogie)
+        // uclid5
+        .def("toUclid5", &AbstractionWrapper::toUclid5)
 
         // hornify all abstraction
         .def("hornifyAll", &AbstractionWrapper::hornifyAll)
