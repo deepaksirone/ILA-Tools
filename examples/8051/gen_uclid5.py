@@ -53,7 +53,7 @@ stage = 0
 def stage_print(description):
     global stage
     stage += 1
-    msg = ('Stage #%d: %s') % (stage, description)
+    msg = ('[Stage #%d] %s') % (stage, description)
     print (msg)
 
 def import_8051_ila(enable_ps):
