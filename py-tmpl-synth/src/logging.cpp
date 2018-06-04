@@ -4,6 +4,7 @@
 #include <exception.hpp>
 #include <set>
 #include <util.hpp>
+#include <vector>
 
 namespace ila
 {
