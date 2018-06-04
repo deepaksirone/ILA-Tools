@@ -130,16 +130,19 @@ def gen_uclid5(hexfile, enable_ps):
     data = readhex(hexfile)
     romvalue = ila.MemValues(16, 8, 0xff)
     for a, d in enumerate(data):
-        #print '0x%04x -> 0x%02x' % (a, d)
+        # print '0x%04x -> 0x%02x' % (a, d)
         romvalue[a] = d
     romconst = model.const(romvalue)
     model.set_init('ROM', romconst)
     model.set_next('ROM', rom)
     stage_print ('Set ROM initial value.')
-
+    # model.set_init('PC', model.const(0, 16))
+    # pc = model.getreg('PC')
+    # model.set_next('PC', ila.ite(pc < model.const(5,16), pc + 1, pc))
     model.toUclid5("test")
 
 def main():
+    # ila.setloglevel(2, "")
     parser = argparse.ArgumentParser()
     parser.add_argument("hexfile", type=str, help='hex file.')
     parser.add_argument("--en", type=int, default=1, 

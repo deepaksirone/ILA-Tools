@@ -22,7 +22,10 @@ namespace ila
     class Abstraction;
 
     struct LiftingZ3Adapter : public Z3ExprAdapter {
-        LiftingZ3Adapter(z3::context& c_) : Z3ExprAdapter(c_, "") {}
+        LiftingZ3Adapter(z3::context& c_) : Z3ExprAdapter(c_, "") 
+        {
+            simplify = true;
+        }
 
         // List of constants.
         typedef std::map<std::string, z3::expr> expr_map_t;
@@ -30,6 +33,7 @@ namespace ila
         expr_map_t constants;
         
         void addConstant(const std::string& name, const Node* init);
+        void addConstant(const std::string& name, const z3::expr& val);
         // Convert a boolean variable into a Z3 expression.
         virtual z3::expr getBoolVarExpr(const BoolVar* bv);
         // Convert a bitvector variable into a Z3 expression.
@@ -37,7 +41,10 @@ namespace ila
         // Convert a mem var into Z3.
         virtual z3::expr getMemVarExpr(const MemVar* mv);
         // convert a variable into an expression.
-        z3::expr getVar(const std::string& name, const Node* node);
+        z3::expr getVar(const std::string& name, const NodeType& type);
+
+        // dump state of constants for debugging.
+        void _dumpConstants();
     };
 
     class Uclid5Translator
@@ -45,6 +52,12 @@ namespace ila
     public:
         typedef std::vector<z3::expr> exprvec_t;
         typedef std::stack<z3::expr> stack_t;
+
+        struct SearchStateVar {
+            const std::string name;
+            const Node* init;
+            const Node* next;
+        };
     private:
         // pointer to the abstraction we are translating.
         Abstraction* abs;  

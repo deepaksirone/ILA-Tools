@@ -35,20 +35,25 @@ namespace ila
     // ---------------------------------------------------------------------- //
     void Z3ExprAdapter::operator() (const Node* n)
     {
+        log2("Z3ExprAdapter.operator()") << *n << std::endl;
         // memoization.
         auto pos = exprmap.find(n);
         if (pos != exprmap.end()) {
+            z3::expr e = pos->second;
+            // std::cout << "found in memo:" << e << "; for: " << *n << std::endl;
             return;
         }
 
-        log2("Z3ExprAdapter.operator()") << *n << std::endl;
         try {
             _populateExprMap(n);
             _populateCnstMap(n);
         } catch (z3::exception& e) {
             ILA_ASSERT(false, e.msg());
         }
-
+        pos = exprmap.find(n);
+        ILA_ASSERT(pos != exprmap.end(), "Must have inserted into exprmap at this point.");
+        // z3::expr e = pos->second;
+        // std::cout << "inserted in memo:" << e << "; for: " << *n << std::endl;
     }
 
     void Z3ExprAdapter::_populateExprMap(const Node* n)
