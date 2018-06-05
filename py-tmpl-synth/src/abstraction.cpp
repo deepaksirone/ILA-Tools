@@ -930,10 +930,20 @@ namespace ila
     }
 
     // ---------------------------------------------------------------------- //
-    void Abstraction::toUclid5(const std::string& name)
+    void Abstraction::toUclid5(const std::string& name, const py::list& l)
     {
         Uclid5Translator ut(this);
-        ut.translate();
+
+        std::vector<std::string> trackingVars;
+        unsigned sz = py::len(l);
+        for (unsigned i=0; i != sz; i++) {
+            py::extract<std::string> ni_(l[i]);
+            if (ni_.check()) {
+                trackingVars.push_back(ni_);
+            }
+        }
+
+        ut.translate(trackingVars);
     }
 
     // ---------------------------------------------------------------------- //

@@ -107,18 +107,18 @@ namespace ila
     }
 
     void Uclid5Translator::search(
-            const std::string& name, 
-            const Node* init, const Node* next)
+            const SearchStateVar& prime,
+            const std::vector<SearchStateVar>& trackers)
     {
         z3::solver S(c_);
 
         stack_t states;
-        z3::expr initExpr = toZ3.getExpr(init);
+        z3::expr initExpr = toZ3.getExpr(prime.init);
         uint64_t initVal = -1;
         ILA_ASSERT(initExpr.is_numeral_u64(initVal), "Initial value must be a numeral representable as u64.");
-        z3::expr var = toZ3.getVar(name + ":value", init->type);
+        z3::expr var = toZ3.getVar(prime.name + ":value", prime.init->type);
 
-        std::cout << "next: " << *next << std::endl;
+        // std::cout << "next: " << *(prime.next) << std::endl;
 
         states.push(initExpr);
         std::set<uint64_t> visited;
@@ -132,16 +132,16 @@ namespace ila
             // Clear the memo.
             toZ3.clear();
             // Set PC = value from stack.
-            toZ3.addConstant(name, stackExpr);
+            toZ3.addConstant(prime.name, stackExpr);
 
             // Get the next expression.
-            z3::expr nxtExpr = toZ3.getExpr(next);
+            z3::expr nxtExpr = toZ3.getExpr((prime.next));
             std::cout << "nxtExpr: " << nxtExpr << std::endl;
 
             // Create the comparison.
-            z3::expr cmp = (var == toZ3.getExpr(next));
+            z3::expr cmp = (var == toZ3.getExpr((prime.next)));
             S.push();
-            S.add(var == toZ3.getExpr(next));
+            S.add(var == toZ3.getExpr((prime.next)));
            
             // ALL-SAT
             while (S.check() == z3::sat) {
@@ -161,14 +161,16 @@ namespace ila
         }
     }
 
-    void Uclid5Translator::translate()
+    void Uclid5Translator::translate(std::vector<std::string>& trackingVars)
     {
         if (searchVars.size() != 1) {
             throw PyILAException(
                     PyExc_RuntimeError, 
                     "Must have exactly one state variable to drive the DFS.");
         } else {
-            search(searchName[0], searchInit[0], searchVars[0]);
+            SearchStateVar prime = { searchName[0], searchInit[0], searchVars[0] };
+            std::vector<SearchStateVar> tracker;
+            search(prime, tracker);
         }
     }
 }

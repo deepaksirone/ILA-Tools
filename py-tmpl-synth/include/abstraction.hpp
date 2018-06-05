@@ -275,7 +275,7 @@ namespace ila
         // convert this abstraction to boogie.
         void toBoogie(const std::string& filename);
         // conver this abstraction to uclid5.
-        void toUclid5(const std::string& filename);
+        void toUclid5(const std::string& filename, const py::list& l);
 
         // convert this abstraction to horn clauses.
         void hornifyAll(const std::string& fileName);
@@ -760,9 +760,9 @@ namespace ila
             abs->toBoogie(name);
         }
 
-        void toUclid5(const std::string& name)
+        void toUclid5(const std::string& name, const py::list& l)
         {
-            abs->toUclid5(name);
+            abs->toUclid5(name, l);
         }
 
         void hornifyAll(const std::string& name)

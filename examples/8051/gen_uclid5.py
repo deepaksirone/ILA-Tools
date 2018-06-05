@@ -139,7 +139,7 @@ def gen_uclid5(hexfile, enable_ps):
     # model.set_init('PC', model.const(0, 16))
     # pc = model.getreg('PC')
     # model.set_next('PC', ila.ite(pc < model.const(5,16), pc + 1, pc))
-    model.toUclid5("test")
+    model.toUclid5("test", [])
 
 def main():
     # ila.setloglevel(2, "")

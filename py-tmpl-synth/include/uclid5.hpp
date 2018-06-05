@@ -74,7 +74,8 @@ namespace ila
         bool isConstant(const npair_t* obj);
 
         // depth-first search.
-        void search(const std::string& name, const Node* init, const Node* next);
+        void search(const SearchStateVar& primeVar, 
+                    const std::vector<SearchStateVar>& vars);
 
     public:
         // constructor.
@@ -82,7 +83,7 @@ namespace ila
         // destructor.
         virtual ~Uclid5Translator();
         // convert to boogie.
-        void translate();
+        void translate(std::vector<std::string>& trackingVars);
     };
 }
 
