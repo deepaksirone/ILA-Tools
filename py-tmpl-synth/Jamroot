@@ -9,16 +9,11 @@ if ! [ python.configured ]
     using python ;
 }
 
-# Specify the path to the Boost project.  If you move this project,
-# adjust this path to refer to the Boost root directory.
-#use-project boost
-#  : /usr/local/boost_1_60_0 ;
-
 lib z3 : : <name>z3 ;
 explicit z3 ;
 
-lib boost_python : : <name>boost_python ;
-explicit boost_python ;
+lib boost_python27 : : <name>boost_python27 ;
+explicit boost_python27 ;
 
 import feature ;
 
@@ -35,10 +30,10 @@ feature.compose <cpp11>on :
     ;
 
 # Set up the project-wide requirements that everything uses the
-# boost_python library from the project whose global ID is
+# boost_python27 library from the project whose global ID is
 # /boost/python.
 project
-  : requirements <library>boost_python 
+  : requirements <library>boost_python27 
                  <library>z3
                  <cpp11>on
   : 
