@@ -87,11 +87,6 @@ namespace ila
     {
     }
 
-    void Uclid5Translator::doSomething() const
-    {
-        std::cout << "doing something ..." << std::endl;
-    }
-
     Uclid5Translator::~Uclid5Translator()
     {
     }

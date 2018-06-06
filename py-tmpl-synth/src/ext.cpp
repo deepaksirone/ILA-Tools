@@ -514,7 +514,6 @@ BOOST_PYTHON_MODULE(ila)
     ;
 
     class_<Uclid5Translator>("Uclid5Translator", no_init)
-        .def("doSomething", &Uclid5Translator::doSomething)
     ;
 
     class_<MicroUnroller>("MicroUnroller", no_init)

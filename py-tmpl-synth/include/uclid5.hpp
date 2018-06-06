@@ -66,8 +66,12 @@ namespace ila
         Uclid5Translator(const Uclid5Translator& ut);
         // destructor.
         virtual ~Uclid5Translator();
-        // methods //
-        void doSomething() const;
+        // set register to its initial value.
+        void initReg(const std::string& reg);
+        // set register value.
+        void setReg(const std::string& reg, py::long_ value);
+        // get next values of register.
+        py::list getRegValues(const std::string& reg, int NUM_MAX_VALUES = 64);
     };
 }
 
