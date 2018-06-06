@@ -73,104 +73,26 @@ namespace ila
         return c.bool_val(false);
     }
 
-    Uclid5Translator::Uclid5Translator(Abstraction* a)
-      : abs(a)
+    Uclid5Translator::Uclid5Translator(const std::string& name_, boost::shared_ptr<Abstraction>& a)
+      : name(name_)
+      , abs(a)
       , toZ3(c_)
     {
-        nodeset_t fetchVars;
-        abs->fetchExpr->getSupportVars(fetchVars);
-        for (auto n : fetchVars) {
-            const npair_t* pair = abs->getMapEntry(n->getName());
-            ILA_ASSERT(pair != NULL, "Variable not in map.");
-            if (!abs->isInput(n->getName())) {
-                if (isConstant(pair)) {
-                    std::cout << "cnst : " << n->getName() << std::endl;
-                    toZ3.addConstant(n->getName(), pair->init.get());
-                } else {
-                    std::cout << "var  : " << n->getName() << std::endl;
-                    searchName.push_back(n->getName());
-                    searchVars.push_back(pair->next.get());
-                    searchInit.push_back(pair->init.get());
-                }
-            }
-        }
     }
 
+    Uclid5Translator::Uclid5Translator(const Uclid5Translator& ut)
+      : name(ut.name)
+      , abs(ut.abs)
+      , toZ3(c_)
+    {
+    }
+
+    void Uclid5Translator::doSomething() const
+    {
+        std::cout << "doing something ..." << std::endl;
+    }
 
     Uclid5Translator::~Uclid5Translator()
     {
-    }
-
-    bool Uclid5Translator::isConstant(const npair_t* obj)
-    {
-        return obj->next->equal(obj->var.get());
-    }
-
-    void Uclid5Translator::search(
-            const SearchStateVar& prime,
-            const std::vector<SearchStateVar>& trackers)
-    {
-        z3::solver S(c_);
-
-        stack_t states;
-        z3::expr initExpr = toZ3.getExpr(prime.init);
-        uint64_t initVal = -1;
-        ILA_ASSERT(initExpr.is_numeral_u64(initVal), "Initial value must be a numeral representable as u64.");
-        z3::expr var = toZ3.getVar(prime.name + ":value", prime.init->type);
-
-        // std::cout << "next: " << *(prime.next) << std::endl;
-
-        states.push(initExpr);
-        std::set<uint64_t> visited;
-        visited.insert(initVal);
-
-        while(states.size() > 0) {
-            z3::expr stackExpr = states.top();
-            states.pop();
-            std::cout << "[pop]: " << stackExpr << std::endl;
-
-            // Clear the memo.
-            toZ3.clear();
-            // Set PC = value from stack.
-            toZ3.addConstant(prime.name, stackExpr);
-
-            // Get the next expression.
-            z3::expr nxtExpr = toZ3.getExpr((prime.next));
-            std::cout << "nxtExpr: " << nxtExpr << std::endl;
-
-            // Create the comparison.
-            z3::expr cmp = (var == toZ3.getExpr((prime.next)));
-            S.push();
-            S.add(var == toZ3.getExpr((prime.next)));
-           
-            // ALL-SAT
-            while (S.check() == z3::sat) {
-                z3::model m = S.get_model();
-                z3::expr e = m.eval(var);
-                uint64_t n = -1;
-                ILA_ASSERT(e.is_numeral_u64(n), "Must be a numeral representable as u64.");
-                if (visited.find(n) == visited.end()) {
-                    std::cout << "[nxt]: " << std::hex << n << std::dec << std::endl;
-                    visited.insert(n);
-                    states.push(e);
-                }
-                S.add(var != e);
-            }
-            S.pop();
-            // std::cout << "result: " << (bool)(r == z3::sat) << std::endl;
-        }
-    }
-
-    void Uclid5Translator::translate(std::vector<std::string>& trackingVars)
-    {
-        if (searchVars.size() != 1) {
-            throw PyILAException(
-                    PyExc_RuntimeError, 
-                    "Must have exactly one state variable to drive the DFS.");
-        } else {
-            SearchStateVar prime = { searchName[0], searchInit[0], searchVars[0] };
-            std::vector<SearchStateVar> tracker;
-            search(prime, tracker);
-        }
     }
 }

@@ -16,6 +16,7 @@
 #include <genCBMC.hpp>
 #include <MicroUnroller.hpp>
 #include <boogie.hpp>
+#include <uclid5.hpp>
 #include <horn.hpp>
 
 namespace ila
@@ -274,8 +275,6 @@ namespace ila
 
         // convert this abstraction to boogie.
         void toBoogie(const std::string& filename);
-        // conver this abstraction to uclid5.
-        void toUclid5(const std::string& filename, const py::list& l);
 
         // convert this abstraction to horn clauses.
         void hornifyAll(const std::string& fileName);
@@ -760,9 +759,10 @@ namespace ila
             abs->toBoogie(name);
         }
 
-        void toUclid5(const std::string& name, const py::list& l)
+        Uclid5Translator toUclid5(const std::string& name)
         {
-            abs->toUclid5(name, l);
+            Uclid5Translator uclid5(name, abs);
+            return uclid5;
         }
 
         void hornifyAll(const std::string& name)

@@ -49,41 +49,25 @@ namespace ila
 
     class Uclid5Translator
     {
-    public:
-        typedef std::vector<z3::expr> exprvec_t;
-        typedef std::stack<z3::expr> stack_t;
-
-        struct SearchStateVar {
-            const std::string name;
-            const Node* init;
-            const Node* next;
-        };
     private:
+        // name of the this translator.
+        const std::string name;
         // pointer to the abstraction we are translating.
-        Abstraction* abs;  
-        std::vector<std::string> searchName;
-        nodevec_t searchVars;
-        nodevec_t searchInit;
-        exprvec_t constEx;
+        boost::shared_ptr<Abstraction> abs;  
 
         // SMT.
         z3::context c_;
         LiftingZ3Adapter toZ3;
 
-        // is constant.
-        bool isConstant(const npair_t* obj);
-
-        // depth-first search.
-        void search(const SearchStateVar& primeVar, 
-                    const std::vector<SearchStateVar>& vars);
-
     public:
         // constructor.
-        Uclid5Translator(Abstraction* a);
+        Uclid5Translator(const std::string& name_, boost::shared_ptr<Abstraction>& a);
+        // copy constructor.
+        Uclid5Translator(const Uclid5Translator& ut);
         // destructor.
         virtual ~Uclid5Translator();
-        // convert to boogie.
-        void translate(std::vector<std::string>& trackingVars);
+        // methods //
+        void doSomething() const;
     };
 }
 

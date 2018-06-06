@@ -7,6 +7,7 @@
 #include <abstraction.hpp>
 #include <logging.hpp>
 #include <EqvChecker.hpp>
+#include <uclid5.hpp>
 
 using namespace boost::python;
 using namespace ila;
@@ -510,6 +511,10 @@ BOOST_PYTHON_MODULE(ila)
             &AbstractionWrapper::getReduceWhenImport,
             &AbstractionWrapper::setReduceWhenImport)
             
+    ;
+
+    class_<Uclid5Translator>("Uclid5Translator", no_init)
+        .def("doSomething", &Uclid5Translator::doSomething)
     ;
 
     class_<MicroUnroller>("MicroUnroller", no_init)
