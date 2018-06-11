@@ -514,6 +514,8 @@ BOOST_PYTHON_MODULE(ila)
     ;
 
     class_<Uclid5Translator>("Uclid5Translator", no_init)
+        .def("initVar", &Uclid5Translator::initVar)
+        .def("getExprValues", &Uclid5Translator::getExprValues)
     ;
 
     class_<MicroUnroller>("MicroUnroller", no_init)

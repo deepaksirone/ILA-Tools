@@ -58,6 +58,7 @@ namespace ila
         // SMT.
         z3::context c_;
         LiftingZ3Adapter toZ3;
+        z3::solver S;
 
     public:
         // constructor.
@@ -67,7 +68,9 @@ namespace ila
         // destructor.
         virtual ~Uclid5Translator();
         // set register to its initial value.
-        void initReg(const std::string& reg);
+        void initVar(const std::string& reg);
+        // get expression value. 
+        py::list getExprValues(const NodeRef* node);
         // set register value.
         void setReg(const std::string& reg, py::long_ value);
         // get next values of register.

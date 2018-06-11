@@ -77,6 +77,7 @@ namespace ila
       : name(name_)
       , abs(a)
       , toZ3(c_)
+      , S(c_)
     {
     }
 
@@ -84,10 +85,63 @@ namespace ila
       : name(ut.name)
       , abs(ut.abs)
       , toZ3(c_)
+      , S(c_)
     {
     }
 
     Uclid5Translator::~Uclid5Translator()
     {
+    }
+
+
+    void Uclid5Translator::initVar(const std::string& name)
+    {
+        const npair_t* vpair = abs->getMapEntry(name);
+        toZ3.addConstant(name, vpair->init.get());
+    }
+
+    py::list Uclid5Translator::getExprValues(const NodeRef* node)
+    {
+        static const int MAX_ITER = 64;
+        int iter = 0;
+
+        nptr_t nptr(node->node);
+        z3::expr e = toZ3.getExpr(nptr.get());
+        z3::expr c = toZ3.getCnst(nptr.get());
+        z3::expr v = toZ3.getVar(nptr->getName(), nptr->type);
+
+        S.push();
+        S.add(c);
+        S.add(e == v);
+
+        py::list result;
+
+        for (iter = 0; iter < MAX_ITER && S.check() == z3::sat; iter++) {
+            z3::model m = S.get_model();
+            z3::expr v_expr = m.eval(v);
+            if (nptr->type.isBool()) {
+                bool value;
+                Z3_lbool vz = v_expr.bool_value();
+                if (vz == Z3_L_FALSE) {
+                    value = false;
+                } else if (vz == Z3_L_TRUE) {
+                    value = true;
+                } else {
+                    throw PyILAException(PyExc_RuntimeError, "Undefined boolean value.");
+                }
+                result.append(value);
+            } else if(nptr->type.isBitvector()) {
+                using namespace py;
+                std::string v_str = v_expr.get_decimal_string(0);
+                PyObject* l_e = PyInt_FromString((char*) v_str.c_str(), NULL, 0);
+                object o_e(handle<>(borrowed(l_e)));
+                result.append(o_e);
+            } else {
+                throw PyILAException(PyExc_RuntimeError, "Unsupported type.");
+            }
+            S.add(v != v_expr);
+        }
+        S.pop();
+        return result;
     }
 }
