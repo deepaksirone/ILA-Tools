@@ -515,6 +515,7 @@ BOOST_PYTHON_MODULE(ila)
 
     class_<Uclid5Translator>("Uclid5Translator", no_init)
         .def("initVar", &Uclid5Translator::initVar)
+        .def("setVar", &Uclid5Translator::setVar)
         .def("getExprValues", &Uclid5Translator::getExprValues)
     ;
 

@@ -141,10 +141,25 @@ def gen_uclid5(hexfile, enable_ps):
     # model.set_next('PC', ila.ite(pc < model.const(5,16), pc + 1, pc))
 
     uclid5 = model.toUclid5("test")
+    uclid5.initVar('ROM')
     uclid5.initVar('PC')
+    rom = model.getmem('ROM')
     pc = model.getreg('PC')
-    initPCs = uclid5.getExprValues(pc)
-    print (initPCs)
+    pc_next = model.get_next('PC')
+    inst_next = rom[pc]
+    stack = uclid5.getExprValues(pc)
+    print stack
+
+    while len(stack):
+        top_pc = stack.pop()
+        uclid5.setVar('PC', top_pc)
+        thisInst = uclid5.getExprValues(inst_next)
+        nextPCs = uclid5.getExprValues(pc_next)
+        assert len(thisInst) == 1
+        assert len(nextPCs) <= 4
+        next_string = ' '.join('0x%02x' % nextPC_i for nextPC_i in nextPCs)
+        print 'OP: 0x%02x -> NEXT: %s' % (thisInst[0], next_string)
+        stack += nextPCs
 
 def main():
     # ila.setloglevel(2, "")

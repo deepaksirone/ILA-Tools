@@ -69,6 +69,8 @@ namespace ila
         virtual ~Uclid5Translator();
         // set register to its initial value.
         void initVar(const std::string& reg);
+        // set register to a specific value.
+        void setVar(const std::string& reg, py::object& value);
         // get expression value. 
         py::list getExprValues(const NodeRef* node);
         // set register value.

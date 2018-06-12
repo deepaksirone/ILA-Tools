@@ -100,10 +100,30 @@ namespace ila
         toZ3.addConstant(name, vpair->init.get());
     }
 
+    void Uclid5Translator::setVar(const std::string& name, py::object& value_)
+    {
+        const npair_t* vpair = abs->getMapEntry(name);
+        // ensure this variable exists.
+        if (vpair == NULL) {
+            throw new PyILAException(PyExc_RuntimeError, "Undefined register.");
+        }
+        // check if this is a bitvector.
+        if (!vpair->var->type.isBitvector()) {
+            throw new PyILAException(
+                    PyExc_RuntimeError, 
+                    "Expected only a bitvector typed state variable.");
+        }
+        auto value = to_cpp_int(value_);
+        std::unique_ptr<Node> var_value(new BitvectorConst(value, vpair->var->type.bitWidth));
+        toZ3.addConstant(name, var_value.get());
+    }
+
     py::list Uclid5Translator::getExprValues(const NodeRef* node)
     {
         static const int MAX_ITER = 64;
         int iter = 0;
+
+        toZ3.clear();
 
         nptr_t nptr(node->node);
         z3::expr e = toZ3.getExpr(nptr.get());
