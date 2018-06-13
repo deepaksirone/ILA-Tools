@@ -147,19 +147,53 @@ def gen_uclid5(hexfile, enable_ps):
     pc = model.getreg('PC')
     pc_next = model.get_next('PC')
     inst_next = rom[pc]
-    stack = uclid5.getExprValues(pc)
-    print stack
+    stack = [ (p, []) for p in uclid5.getExprValues(pc) ]
+    visited = set()
 
     while len(stack):
-        top_pc = stack.pop()
+        top_pc, call_stack = stack.pop()
+        state = (top_pc, tuple(call_stack))
+        if state in visited:
+            continue
+        else:
+            visited.add(state)
+
         uclid5.setVar('PC', top_pc)
         thisInst = uclid5.getExprValues(inst_next)
-        nextPCs = uclid5.getExprValues(pc_next)
         assert len(thisInst) == 1
-        assert len(nextPCs) <= 4
+        opcode = thisInst[0]
+        if iscall(opcode):
+            call_stack_new = call_stack[:]
+            call_stack_new.append(nextpc(top_pc, opcode))
+            nextPCs = uclid5.getExprValues(pc_next)
+        elif isret(opcode):
+            call_stack_new = call_stack[:]
+            nextPCs = [call_stack_new.pop()]
+        else:
+            call_stack_new = call_stack
+            nextPCs = uclid5.getExprValues(pc_next)
+
+
+        assert len(nextPCs) <= 16
         next_string = ' '.join('0x%02x' % nextPC_i for nextPC_i in nextPCs)
-        print 'OP: 0x%02x -> NEXT: %s' % (thisInst[0], next_string)
-        stack += nextPCs
+        call_stack_string = ' '.join('0x%04x' % pc for pc in call_stack)
+        print 'PC: 0x%04x [%20s]; OP: 0x%02x -> NEXT: %s' % (top_pc, call_stack, opcode, next_string)
+        stack += [(n, call_stack_new) for n in nextPCs]
+
+
+def iscall(opcode):
+    return (((opcode & 0xF) == 1) and ((opcode & 0x10) == 0x10)) or (opcode == 0x12)
+
+def nextpc(pc, opcode):
+    if opcode == 0x12:
+        return pc + 0x3
+    elif (((opcode & 0xF) == 1) and ((opcode & 0x10) == 0x10)):
+        return pc + 0x2
+    else:
+        assert False
+
+def isret(opcode):
+    return opcode == 0x22
 
 def main():
     # ila.setloglevel(2, "")
