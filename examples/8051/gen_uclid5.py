@@ -2,6 +2,7 @@
 
 import sys
 import argparse
+import pickle
 
 import ila
 from uc8051ast import uc8051
@@ -112,7 +113,6 @@ def import_8051_ila(enable_ps):
     ]
     states = regs + ['IRAM']
 
-
     for s in states:
         ast = model.importOne('asts/%s_%s' % (s, 'en' if enable_ps else 'dis'))
         model.set_next(s, ast)
@@ -124,7 +124,12 @@ def import_8051_ila(enable_ps):
     stage_print ('Finished importing 8051 ASTs.')
     return (model, rom)
 
-def gen_uclid5(hexfile, enable_ps):
+# utility function to create names for states.
+def state_to_name(pc, call_stack):
+    stack_repr = '_'.join('%X' % pc for pc in call_stack)
+    return 'pc_%X_stack_%s' % (pc, stack_repr)
+
+def gen_uclid5(hexfile, enable_ps, filename):
     (model, rom) = import_8051_ila(enable_ps)
 
     # set ROM initial value.
@@ -147,15 +152,49 @@ def gen_uclid5(hexfile, enable_ps):
     pc_next = model.get_next('PC')
     inst_next = rom[pc]
 
-    # setup DFS
-    stack = [ (p, tuple([])) for p in uclid5.getExprValues(pc) ]
-    visited = set()
-    statemap = {}
+    if filename is None:
+        init_pcs = uclid5.getExprValues(pc)
+        init_states = [ (p, tuple([])) for p in init_pcs ]
+        init_state_names = [ state_to_name(pc, tuple([])) for pc in init_pcs ]
+        state_map, state_edges, ret_set = get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states)
+        with open('state_graph.obj', 'wt') as f:
+            pickle.dump(init_state_names, f)
+            pickle.dump(state_map, f)
+            pickle.dump(state_edges, f)
+            pickle.dump(ret_set, f)
+    else:
+        with open(filename, 'rt') as f:
+            init_state_names = pickle.load(f)
+            state_map = pickle.load(f)
+            state_edges = pickle.load(f)
+            ret_set = pickle.load(f)
 
-    # utlity function to create names for states.
-    def state_name(pc, call_stack):
-        stack_repr = '_'.join('%X' % pc for pc in call_stack)
-        return 'pc_%X_stack_%s' % (pc, stack_repr)
+    reprs = merge_states(init_state_names, state_edges)
+    for k in sorted(reprs.keys()):
+        print '%-20s -> %-20s' % (k, reprs[k])
+
+def merge_states(init_state_names, state_edges):
+    reprs = {}
+    visited = set()
+    def visit(st, rep):
+        if st in visited: return
+        else: visited.add(st)
+
+        next_states = state_edges[st]
+        reprs[st] = rep
+        if len(next_states) == 1:
+            visit(next_states[0], rep)
+        else:
+            for nxt_st in next_states: visit(nxt_st, nxt_st)
+    for ist in init_state_names: visit(ist, ist)
+    return reprs
+
+def get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states):
+    stack = init_states
+    visited = set()
+    state_map = {}
+    state_edges = {}
+    ret_set = set()
 
     while len(stack):
         top_pc, call_stack = stack.pop()
@@ -164,9 +203,9 @@ def gen_uclid5(hexfile, enable_ps):
         if state in visited: continue
         else: visited.add(state)
 
-        name = state_name(top_pc, call_stack)
-        assert name not in statemap
-        statemap[name] = (top_pc, call_stack)
+        state_name = state_to_name(top_pc, call_stack)
+        assert state_name not in state_map
+        state_map[state_name] = (top_pc, call_stack)
 
         # set the current PC value.
         uclid5.setVar('PC', top_pc)
@@ -184,13 +223,20 @@ def gen_uclid5(hexfile, enable_ps):
             ret_pc = call_stack_new_list.pop()
             call_stack_new = tuple(call_stack_new_list)
             nextPCs = [ret_pc]
+            ret_set.add(state_name)
         # else symbolic execution rules.
         else:
             call_stack_new = call_stack
             nextPCs = uclid5.getExprValues(pc_next)
+
         # add new states to be visited to the stack.
-        stack += [(n, call_stack_new) for n in nextPCs]
-        # need to add edges here.
+        next_states = [(n, call_stack_new) for n in nextPCs]
+        stack += next_states
+
+        # add edges to state graph.
+        next_state_names = [state_to_name(next_pc, call_stack_new) for (next_pc, call_stack_new) in next_states]
+        assert state_name not in state_edges
+        state_edges[state_name] = next_state_names
 
         # now print out where we are.
         assert len(nextPCs) <= 16
@@ -198,6 +244,7 @@ def gen_uclid5(hexfile, enable_ps):
         call_stack_string = ' '.join('%04X' % pc for pc in call_stack)
         print 'PC: %04X [%20s]; OP: %02X -> NEXT: %s' % (top_pc, call_stack_string, opcode, next_string)
 
+    return state_map, state_edges, ret_set
 
 def iscall(opcode):
     return (((opcode & 0xF) == 1) and ((opcode & 0x10) == 0x10)) or (opcode == 0x12)
@@ -219,9 +266,10 @@ def main():
     parser.add_argument("hexfile", type=str, help='hex file.')
     parser.add_argument("--en", type=int, default=1, 
                         help="enable parameterized synthesis.")
-
+    parser.add_argument("--load", type=str, default=None,
+                        help="pickled CFG filename")
     args = parser.parse_args()
-    gen_uclid5(args.hexfile, args.en) 
+    gen_uclid5(args.hexfile, args.en, args.load)
 
 
 if __name__ == '__main__':
