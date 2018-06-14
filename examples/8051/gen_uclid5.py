@@ -150,6 +150,7 @@ def gen_uclid5(hexfile, enable_ps):
     # setup DFS
     stack = [ (p, tuple([])) for p in uclid5.getExprValues(pc) ]
     visited = set()
+    statemap = {}
 
     # utlity function to create names for states.
     def state_name(pc, call_stack):
@@ -164,6 +165,8 @@ def gen_uclid5(hexfile, enable_ps):
         else: visited.add(state)
 
         name = state_name(top_pc, call_stack)
+        assert name not in statemap
+        statemap[name] = (top_pc, call_stack)
 
         # set the current PC value.
         uclid5.setVar('PC', top_pc)
