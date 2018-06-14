@@ -127,19 +127,18 @@ def import_8051_ila(enable_ps):
 def gen_uclid5(hexfile, enable_ps):
     (model, rom) = import_8051_ila(enable_ps)
 
+    # set ROM initial value.
     data = readhex(hexfile)
     romvalue = ila.MemValues(16, 8, 0xff)
     for a, d in enumerate(data):
-        # print '0x%04x -> 0x%02x' % (a, d)
+        # print '%04X -> %02X' % (a, d)
         romvalue[a] = d
     romconst = model.const(romvalue)
     model.set_init('ROM', romconst)
     model.set_next('ROM', rom)
     stage_print ('Set ROM initial value.')
-    # model.set_init('PC', model.const(0, 16))
-    # pc = model.getreg('PC')
-    # model.set_next('PC', ila.ite(pc < model.const(5,16), pc + 1, pc))
 
+    # setup uclid converter.
     uclid5 = model.toUclid5("test")
     uclid5.initVar('ROM')
     uclid5.initVar('PC')
@@ -147,38 +146,54 @@ def gen_uclid5(hexfile, enable_ps):
     pc = model.getreg('PC')
     pc_next = model.get_next('PC')
     inst_next = rom[pc]
-    stack = [ (p, []) for p in uclid5.getExprValues(pc) ]
+
+    # setup DFS
+    stack = [ (p, tuple([])) for p in uclid5.getExprValues(pc) ]
     visited = set()
+
+    # utlity function to create names for states.
+    def state_name(pc, call_stack):
+        stack_repr = '_'.join('%X' % pc for pc in call_stack)
+        return 'pc_%X_stack_%s' % (pc, stack_repr)
 
     while len(stack):
         top_pc, call_stack = stack.pop()
-        state = (top_pc, tuple(call_stack))
-        if state in visited:
-            continue
-        else:
-            visited.add(state)
+        # keep track of visited states.
+        state = (top_pc, call_stack)
+        if state in visited: continue
+        else: visited.add(state)
 
+        name = state_name(top_pc, call_stack)
+
+        # set the current PC value.
         uclid5.setVar('PC', top_pc)
+        # get current opcode.
         thisInst = uclid5.getExprValues(inst_next)
         assert len(thisInst) == 1
         opcode = thisInst[0]
+        # if it is a call, we have to add it to the stack.
         if iscall(opcode):
-            call_stack_new = call_stack[:]
-            call_stack_new.append(nextpc(top_pc, opcode))
+            call_stack_new = tuple(list(call_stack) + [nextpc(top_pc, opcode)])
             nextPCs = uclid5.getExprValues(pc_next)
+        # if it is a return, don't symbolically execute, instead pop off the stack.
         elif isret(opcode):
-            call_stack_new = call_stack[:]
-            nextPCs = [call_stack_new.pop()]
+            call_stack_new_list = list(call_stack)
+            ret_pc = call_stack_new_list.pop()
+            call_stack_new = tuple(call_stack_new_list)
+            nextPCs = [ret_pc]
+        # else symbolic execution rules.
         else:
             call_stack_new = call_stack
             nextPCs = uclid5.getExprValues(pc_next)
-
-
-        assert len(nextPCs) <= 16
-        next_string = ' '.join('0x%02x' % nextPC_i for nextPC_i in nextPCs)
-        call_stack_string = ' '.join('0x%04x' % pc for pc in call_stack)
-        print 'PC: 0x%04x [%20s]; OP: 0x%02x -> NEXT: %s' % (top_pc, call_stack, opcode, next_string)
+        # add new states to be visited to the stack.
         stack += [(n, call_stack_new) for n in nextPCs]
+        # need to add edges here.
+
+        # now print out where we are.
+        assert len(nextPCs) <= 16
+        next_string = ' '.join('%04X' % nextPC_i for nextPC_i in nextPCs)
+        call_stack_string = ' '.join('%04X' % pc for pc in call_stack)
+        print 'PC: %04X [%20s]; OP: %02X -> NEXT: %s' % (top_pc, call_stack_string, opcode, next_string)
 
 
 def iscall(opcode):
