@@ -6,12 +6,12 @@ namespace ila
 {
     // ---------------------------------------------------------------------- //
     ITESimplifier::ITESimplifier(const nptr_t& a)
-      : ctx()
-      , S(ctx)
-      , adapter(ctx, "")
+      : ctx(new z3::context())
+      , S(new z3::solver(*ctx.get()))
+      , adapter(new Z3ExprAdapter(*ctx.get(), ""))
       , rwmap(NUM_HASHTABLE_BUCKETS, nodeHash, nodeEqual)
     {
-        adapter.simplify = true;
+        adapter->simplify = true;
         _add(a);
     }
 
@@ -35,12 +35,12 @@ namespace ila
     // ---------------------------------------------------------------------- //
     void ITESimplifier::_add(const nptr_t& a, bool negate)
     {
-        z3::expr e_a = adapter.getExpr(a.get());
-        z3::expr c_a = adapter.getCnst(a.get());
+        z3::expr e_a = adapter->getExpr(a.get());
+        z3::expr c_a = adapter->getCnst(a.get());
 
         if(negate) e_a = (!e_a).simplify();
-        S.add(e_a);
-        S.add(c_a);
+        S->add(e_a);
+        S->add(c_a);
 
         log2("ITESimplifier._add") << "assumption/expr: " << e_a << std::endl;
         log2("ITESimplifier._add") << "assumption/cnst: " << c_a << std::endl;
@@ -52,24 +52,24 @@ namespace ila
 
         using namespace boost::logic;
         using namespace z3;
-        S.push();
-        expr e_cond = adapter.getExpr(cond.get());
-        expr c_cond = adapter.getCnst(cond.get()); 
-        S.add(c_cond);
+        S->push();
+        expr e_cond = adapter->getExpr(cond.get());
+        expr c_cond = adapter->getCnst(cond.get()); 
+        S->add(c_cond);
 
         tribool is_cnst = indeterminate;
 
         // can this be false?
-        S.push();
-        S.add(!e_cond);
-        auto r_false = S.check();
-        S.pop();
+        S->push();
+        S->add(!e_cond);
+        auto r_false = S->check();
+        S->pop();
 
         // can this be true?
-        S.push();
-        S.add(e_cond);
-        auto r_true = S.check();
-        S.pop();
+        S->push();
+        S->add(e_cond);
+        auto r_true = S->check();
+        S->pop();
 
         // now check if it is constant.
         if ((r_false == unknown || r_true == unknown) ||
@@ -81,7 +81,7 @@ namespace ila
         } else {
             is_cnst = true;
         }
-        S.pop();
+        S->pop();
 
         return is_cnst;
     }
@@ -187,8 +187,8 @@ namespace ila
 
     nptr_t ITESimplifier::rewriteITE(const Node* n) 
     {
-        S.pop();
-        log2("ITESimplifier.rewriteITE") << "S.pop(): " << *n << std::endl;
+        S->pop();
+        log2("ITESimplifier.rewriteITE") << "S->pop(): " << *n << std::endl;
 
         const nptr_t& cond = n->arg(0);
         auto iscnst = _isConstant(cond);
@@ -249,26 +249,26 @@ namespace ila
             dfs(cond.get());
 
             // true
-            S.push();
+            S->push();
             _add(cond, false);
-            auto r_true = S.check();
+            auto r_true = S->check();
             ILA_ASSERT(r_true != z3::unknown, "Undef result from SMT.");
             if (r_true == z3::sat) {
                 log2("ITESimplifier.dfs") << "ite: TRUE sat: " << *(cond.get()) << std::endl;
                 dfs(t_val.get());
             }
-            S.pop();
+            S->pop();
 
             // false.
-            S.push();
+            S->push();
             _add(cond, true);
-            auto r_false = S.check();
+            auto r_false = S->check();
             ILA_ASSERT(r_false != z3::unknown, "Undef result from SMT.");
             if (r_false == z3::sat) {
                 log2("ITESimplifier.dfs") << "ite: FALSE sat: " << *(cond.get()) << std::endl;
                 dfs(f_val.get());
             }
-            S.pop();
+            S->pop();
 
             // sanity check.
             ILA_ASSERT(r_true == z3::sat || r_false == z3::sat,
