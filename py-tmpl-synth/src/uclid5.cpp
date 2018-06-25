@@ -97,6 +97,10 @@ namespace ila
     void Uclid5Translator::initVar(const std::string& name)
     {
         const npair_t* vpair = abs->getMapEntry(name);
+        // ensure this variable exists.
+        if (vpair == NULL) {
+            throw new PyILAException(PyExc_RuntimeError, "Undefined register.");
+        }
         toZ3.addConstant(name, vpair->init.get());
     }
 
