@@ -76,16 +76,20 @@ namespace ila
     Uclid5Translator::Uclid5Translator(const std::string& name_, boost::shared_ptr<Abstraction>& a)
       : name(name_)
       , abs(a)
-      , toZ3(c_)
-      , S(c_)
+      , c_(new z3::context())
+      , toZ3(new LiftingZ3Adapter(*c_))
+      , S(new z3::solver(*c_))
+      , simplifier(c_, S, toZ3)
     {
     }
 
     Uclid5Translator::Uclid5Translator(const Uclid5Translator& ut)
       : name(ut.name)
       , abs(ut.abs)
-      , toZ3(c_)
-      , S(c_)
+      , c_(ut.c_)
+      , toZ3(new LiftingZ3Adapter(*c_))
+      , S(new z3::solver(*c_))
+      , simplifier(c_, S, toZ3)
     {
     }
 
@@ -97,7 +101,11 @@ namespace ila
     void Uclid5Translator::initVar(const std::string& name)
     {
         const npair_t* vpair = abs->getMapEntry(name);
-        toZ3.addConstant(name, vpair->init.get());
+        // ensure this variable exists.
+        if (vpair == NULL) {
+            throw new PyILAException(PyExc_RuntimeError, "Undefined register.");
+        }
+        toZ3->addConstant(name, vpair->init.get());
     }
 
     void Uclid5Translator::setVar(const std::string& name, py::object& value_)
@@ -115,29 +123,38 @@ namespace ila
         }
         auto value = to_cpp_int(value_);
         std::unique_ptr<Node> var_value(new BitvectorConst(value, vpair->var->type.bitWidth));
-        toZ3.addConstant(name, var_value.get());
+        toZ3->addConstant(name, var_value.get());
     }
 
-    py::list Uclid5Translator::getExprValues(const NodeRef* node)
+    NodeRef* Uclid5Translator::simplify(NodeRef& n)
+    {
+        //std::cout << *n.node.get() << std::endl;
+        //return NULL;
+        nptr_t simpl_node = simplifier.simplify((n.node).get());
+        return new NodeRef(simpl_node);
+        //return 
+    }
+
+    py::list Uclid5Translator::getExprValues(NodeRef& node)
     {
         static const int MAX_ITER = 64;
         int iter = 0;
 
-        toZ3.clear();
+        toZ3->clear();
 
-        nptr_t nptr(node->node);
-        z3::expr e = toZ3.getExpr(nptr.get());
-        z3::expr c = toZ3.getCnst(nptr.get());
-        z3::expr v = toZ3.getVar(nptr->getName(), nptr->type);
+        nptr_t nptr(node.node);
+        z3::expr e = toZ3->getExpr(nptr.get());
+        z3::expr c = toZ3->getCnst(nptr.get());
+        z3::expr v = toZ3->getVar(nptr->getName(), nptr->type);
 
-        S.push();
-        S.add(c);
-        S.add(e == v);
+        S->push();
+        S->add(c);
+        S->add(e == v);
 
         py::list result;
 
-        for (iter = 0; iter < MAX_ITER && S.check() == z3::sat; iter++) {
-            z3::model m = S.get_model();
+        for (iter = 0; iter < MAX_ITER && S->check() == z3::sat; iter++) {
+            z3::model m = S->get_model();
             z3::expr v_expr = m.eval(v);
             if (nptr->type.isBool()) {
                 bool value;
@@ -159,9 +176,9 @@ namespace ila
             } else {
                 throw PyILAException(PyExc_RuntimeError, "Unsupported type.");
             }
-            S.add(v != v_expr);
+            S->add(v != v_expr);
         }
-        S.pop();
+        S->pop();
         return result;
     }
 }

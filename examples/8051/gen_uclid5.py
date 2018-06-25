@@ -242,7 +242,9 @@ def get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states):
         assert len(nextPCs) <= 16
         next_string = ' '.join('%04X' % nextPC_i for nextPC_i in nextPCs)
         call_stack_string = ' '.join('%04X' % pc for pc in call_stack)
-        print 'PC: %04X [%20s]; OP: %02X -> NEXT: %s' % (top_pc, call_stack_string, opcode, next_string)
+
+        pc_next_simplified = uclid5.simplify(pc_next)
+        print 'PC: %04X [%20s]; OP: %02X -> NEXT: %s; PC_NEXT_EXPR: %s' % (top_pc, call_stack_string, opcode, next_string, str(pc_next))
 
     return state_map, state_edges, ret_set
 

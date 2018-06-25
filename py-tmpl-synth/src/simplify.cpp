@@ -7,12 +7,23 @@ namespace ila
     // ---------------------------------------------------------------------- //
     ITESimplifier::ITESimplifier(const nptr_t& a)
       : ctx(new z3::context())
-      , S(new z3::solver(*ctx.get()))
-      , adapter(new Z3ExprAdapter(*ctx.get(), ""))
+      , S(new z3::solver(*ctx))
+      , adapter(new Z3ExprAdapter(*ctx, ""))
       , rwmap(NUM_HASHTABLE_BUCKETS, nodeHash, nodeEqual)
     {
         adapter->simplify = true;
         _add(a);
+    }
+
+    ITESimplifier::ITESimplifier(
+        std::shared_ptr<z3::context> ctx_, 
+        std::shared_ptr<z3::solver> S_,
+        std::shared_ptr<Z3ExprAdapter> adapter_)
+
+        : ctx(ctx_)
+        , S(S_)
+        , adapter(adapter_)
+    {
     }
 
     ITESimplifier::~ITESimplifier()

@@ -12,9 +12,9 @@ namespace ila
 {
     class ITESimplifier
     {
-        std::unique_ptr<z3::context> ctx;
-        std::unique_ptr<z3::solver> S;
-        std::unique_ptr<Z3ExprAdapter> adapter;
+        std::shared_ptr<z3::context> ctx;
+        std::shared_ptr<z3::solver> S;
+        std::shared_ptr<Z3ExprAdapter> adapter;
 
         rwmap_t rwmap;
 
@@ -28,7 +28,12 @@ namespace ila
     public:
         // constructor.
         ITESimplifier(const nptr_t& assump);
-        // constructor for a prexisting adapter.
+        // constructor with existing contexts, solvers and expr adapters.
+        ITESimplifier(
+                std::shared_ptr<z3::context> ctx_, 
+                std::shared_ptr<z3::solver> S_,
+                std::shared_ptr<Z3ExprAdapter> adapter_);
+
         // destructor.
         virtual ~ITESimplifier();
         // add a vector of assumption.
