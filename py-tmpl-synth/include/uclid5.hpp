@@ -14,6 +14,7 @@
 #include <util.hpp>
 #include <stack>
 #include <smt.hpp>
+#include <simplify.hpp>
 
 #include <ast.hpp>
 
@@ -56,9 +57,10 @@ namespace ila
         boost::shared_ptr<Abstraction> abs;  
 
         // SMT.
-        z3::context c_;
-        LiftingZ3Adapter toZ3;
-        z3::solver S;
+        std::shared_ptr<z3::context> c_;
+        std::shared_ptr<LiftingZ3Adapter> toZ3;
+        std::shared_ptr<z3::solver> S;
+        ITESimplifier simplifier;
 
     public:
         // constructor.
@@ -77,6 +79,8 @@ namespace ila
         void setReg(const std::string& reg, py::long_ value);
         // get next values of register.
         py::list getRegValues(const std::string& reg, int NUM_MAX_VALUES = 64);
+        // get the simplified value of this expression.
+        NodeRef* simplify(const NodeRef* node);
     };
 }
 

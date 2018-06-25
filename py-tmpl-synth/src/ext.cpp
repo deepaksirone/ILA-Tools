@@ -517,6 +517,8 @@ BOOST_PYTHON_MODULE(ila)
         .def("initVar", &Uclid5Translator::initVar)
         .def("setVar", &Uclid5Translator::setVar)
         .def("getExprValues", &Uclid5Translator::getExprValues)
+        .def("simplify", &Uclid5Translator::simplify,
+                return_value_policy<manage_new_object>());
     ;
 
     class_<MicroUnroller>("MicroUnroller", no_init)
