@@ -155,8 +155,8 @@ def gen_uclid5(hexfile, enable_ps, filename):
     if filename is None:
         init_pcs = uclid5.getExprValues(pc)
         init_states = [ (p, tuple([])) for p in init_pcs ]
-        init_state_names = [ state_to_name(pc, tuple([])) for pc in init_pcs ]
-        state_map, state_edges, ret_set = get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states)
+        init_state_names = [ state_to_name(pc_val, tuple([])) for pc_val in init_pcs ]
+        state_map, state_edges, ret_set = get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states, romconst)
         with open('state_graph.obj', 'wt') as f:
             pickle.dump(init_state_names, f)
             pickle.dump(state_map, f)
@@ -189,7 +189,7 @@ def merge_states(init_state_names, state_edges):
     for ist in init_state_names: visit(ist, ist)
     return reprs
 
-def get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states):
+def get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states, romconst):
     stack = init_states
     visited = set()
     state_map = {}
@@ -210,9 +210,14 @@ def get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states):
         # set the current PC value.
         uclid5.setVar('PC', top_pc)
         # get current opcode.
-        thisInst = uclid5.getExprValues(inst_next)
+        thisInst = uclid5.getExprValues(rom[pc])
+        thisInst1 = uclid5.getExprValues(rom[pc+1])
+        thisInst2 = uclid5.getExprValues(rom[pc+2])
         assert len(thisInst) == 1
+        assert len(thisInst1) == 1
+        assert len(thisInst2) == 1
         opcode = thisInst[0]
+        opcode1, opcode2 = thisInst1[0], thisInst2[0]
         # if it is a call, we have to add it to the stack.
         if iscall(opcode):
             call_stack_new = tuple(list(call_stack) + [nextpc(top_pc, opcode)])
@@ -243,8 +248,8 @@ def get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states):
         next_string = ' '.join('%04X' % nextPC_i for nextPC_i in nextPCs)
         call_stack_string = ' '.join('%04X' % pc for pc in call_stack)
 
-        pc_next_simplified = uclid5.simplify(pc_next)
-        print 'PC: %04X [%20s]; OP: %02X -> NEXT: %s; PC_NEXT_EXPR: %s' % (top_pc, call_stack_string, opcode, next_string, str(pc_next))
+        pc_next_simplified = ila.simplify((rom[pc] == opcode) & (rom[pc+1] == opcode1) & (rom[pc+2] == opcode2) & (pc == top_pc), pc_next)
+        print 'PC: %04X [%20s]; OP: %02X -> NEXT: %s; PC_NEXT_EXPR: %s' % (top_pc, call_stack_string, opcode, next_string, str(pc_next_simplified))
 
     return state_map, state_edges, ret_set
 
