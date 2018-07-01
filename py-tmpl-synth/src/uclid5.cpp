@@ -379,10 +379,9 @@ namespace ila
 	     	switch(memop->getOp()) {
 			case MemOp::INVALID 	: { program = "InvalidMemOp"; break; }
 			case MemOp::STORE	: { NodeRef a1(memop->arg(0)); NodeRef a2(memop->arg(1)); NodeRef a3(memop->arg(2));
-						program = getTranslation(a1) + "[" + getTranslation(a2) + "->" + getTranslation(a3) + "]"; }
-			case MemOp::ITE 	: { NodeRef a1(memop->arg(0)); NodeRef a2(memop->arg(1)); NodeRef a3(memop->arg(2));
-						  program = "if (" + getTranslation(a1) + ")" + " then { " + getTranslation(a2) + " }" +
-						  " else { " + getTranslation(a3) + " }"; break;}
+						program = getTranslation(a1) + "[" + getTranslation(a2) + "->" + 
+							getTranslation(a3) + "]"; break; }
+			case MemOp::ITE 	: { NodeRef a1(memop->arg(0)); NodeRef a2(memop->arg(1)); NodeRef a3(memop->arg(2));						  	   program = "if (" + getTranslation(a1) + ")" + " then { " + getTranslation(a2) + " }" +" else { " + getTranslation(a3) + " }"; break;}
 			case MemOp::STOREBLOCK :
 			default:	{ program = "InvalidMemOP"; }
 		}
