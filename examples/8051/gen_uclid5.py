@@ -111,18 +111,20 @@ def import_8051_ila(enable_ps):
         'SBUF', 'IE', 'IP', 'XRAM_DATA_OUT', 
         'XRAM_ADDR'
     ]
-    states = regs + ['IRAM']
-
+    states = regs + ['IRAM'] 
+    memories = ['ROM', 'IRAM']
+    next_exprs = {}
     for s in states:
         ast = model.importOne('asts/%s_%s' % (s, 'en' if enable_ps else 'dis'))
         model.set_next(s, ast)
+        next_exprs[s] = model.get_next(s)
 
     for r in regs:
         reg = model.getreg(r)
         zero = model.const(0, reg.type.bitwidth)
         model.set_init(r, zero)
     stage_print ('Finished importing 8051 ASTs.')
-    return (model, rom)
+    return (model, rom, regs, memories, next_exprs)
 
 # utility function to create names for states.
 def state_to_name(pc, call_stack):
@@ -130,7 +132,7 @@ def state_to_name(pc, call_stack):
     return 'pc_%X_stack_%s' % (pc, stack_repr)
 
 def gen_uclid5(hexfile, enable_ps, filename):
-    (model, rom) = import_8051_ila(enable_ps)
+    (model, rom, regs, memories, next_exprs) = import_8051_ila(enable_ps)
 
     # set ROM initial value.
     data = readhex(hexfile)
@@ -141,6 +143,7 @@ def gen_uclid5(hexfile, enable_ps, filename):
     romconst = model.const(romvalue)
     model.set_init('ROM', romconst)
     model.set_next('ROM', rom)
+    next_exprs['ROM'] = model.get_next('ROM')
     stage_print ('Set ROM initial value.')
 
     # setup uclid converter.
@@ -156,7 +159,8 @@ def gen_uclid5(hexfile, enable_ps, filename):
         init_pcs = uclid5.getExprValues(pc)
         init_states = [ (p, tuple([])) for p in init_pcs ]
         init_state_names = [ state_to_name(pc_val, tuple([])) for pc_val in init_pcs ]
-        state_map, state_edges, ret_set = get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states, romconst)
+        state_map, state_edges, ret_set, state_to_nexts = get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states, romconst, next_exprs)
+        print generateUclid5Program("test1", model, uclid5, regs, memories, (state_map, state_edges, ret_set, state_to_nexts))
         with open('state_graph.obj', 'wt') as f:
             pickle.dump(init_state_names, f)
             pickle.dump(state_map, f)
@@ -189,12 +193,13 @@ def merge_states(init_state_names, state_edges):
     for ist in init_state_names: visit(ist, ist)
     return reprs
 
-def get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states, romconst):
+def get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states, romconst, next_exprs):
     stack = init_states
     visited = set()
     state_map = {}
     state_edges = {}
     ret_set = set()
+    state_to_nexts = {}
 
     while len(stack):
         top_pc, call_stack = stack.pop()
@@ -248,13 +253,74 @@ def get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states, romconst):
         next_string = ' '.join('%04X' % nextPC_i for nextPC_i in nextPCs)
         call_stack_string = ' '.join('%04X' % pc for pc in call_stack)
 
+        simp_nexts = {}
+        # TODO: Parallelize this loop, too slow on one core
+        for s in next_exprs.keys():
+            simp_nexts[s] = ila.simplify((rom[pc] == opcode) & (rom[pc+1] == opcode1) & (rom[pc+2] == opcode2) & (pc == top_pc), next_exprs[s])
+        state_to_nexts[state_name] = simp_nexts 
         pc_next_simplified = ila.simplify((rom[pc] == opcode) & (rom[pc+1] == opcode1) & (rom[pc+2] == opcode2) & (pc == top_pc), pc_next)
         print 'PC: %04X [%20s]; OP: %02X -> NEXT: %s; PC_NEXT_EXPR: %s' % (top_pc, call_stack_string, opcode, next_string, str(pc_next_simplified))
 
-    return state_map, state_edges, ret_set
+    return state_map, state_edges, ret_set, state_to_nexts
 
 def iscall(opcode):
     return (((opcode & 0xF) == 1) and ((opcode & 0x10) == 0x10)) or (opcode == 0x12)
+
+def generateDeclarations(module_name, model, regs, memories, states):
+    program = "" 
+    for reg in regs:
+        program += "\tvar\t" + reg + "\t:\tbv" + str(model.getreg(reg).type.bitwidth) + ";\n"
+    for mem in memories:
+        addrw = model.getmem(mem).type.addrwidth
+        dataw = model.getmem(mem).type.datawidth
+        program += "\tvar\t" + mem + "\t:\t[bv" + str(addrw) + "]" + "bv" + str(dataw) + ";\n"
+    
+    program += "\ttype states_t = enum {"
+    for state in states[:-1]:
+        program += state + ","
+    program += states[-1] + "};\n"
+    program += "\tvar current_state\t:\tstates_t;\n"
+    return program
+
+def generateInitBlock(model, regs, memories):
+    program = "init {\n"
+    for reg in regs:
+        v = str(int(str(model.get_init(reg)), 16))
+        program += "\t" + reg + "\t= " + v + "bv" + str(model.getreg(reg).type.bitwidth) + ";\n"
+    # TODO initialize memory
+    program += "current_state\t= pc_" + str(int(str(model.get_init('PC')), 16)) + "_stack_;\n"
+    program += "}\n"
+    return program
+
+def generateNextBlock(model, uclid5, regs, memories, state_map, state_edges, state_to_nexts):
+    program = "next {\n"
+    state_updates = regs + memories
+    pc_bitwidth = model.getreg('PC').type.bitwidth
+    program += "\tcase\n"
+    for state in state_edges.keys():
+        program += "\t(current_state == " + state + ") : {\n"  
+        program += "\tassume(PC == " + str(state_map[state][0]) + "bv" + str(pc_bitwidth) + ");\n"
+        for s in state_updates:
+            program += "\t" + s + "'\t= " + uclid5.getTranslation(state_to_nexts[state][s]) + ";\n"
+        program += "\tassume("
+        for nxt_s in state_edges[state][:-1]:
+            program += "current_state' == " + nxt_s + " || "
+        program += "current_state' == " + state_edges[state][-1] + ");\n"
+        program += "}\n"
+    program += "\tesac\n"
+    program += "}\n"
+    return program
+
+def generateUclid5Program(module_name, model, uclid5, regs, memories, state_graph):
+    (state_map, state_edges, ret_set, state_to_nexts) = state_graph
+    program = "module " + module_name + " {\n"
+    program += generateDeclarations(module_name, model, regs, memories, state_map.keys())
+    program += generateInitBlock(model, regs, memories)
+    program += generateNextBlock(model, uclid5, regs, memories, state_map, state_edges, state_to_nexts)
+    program += "}\n"
+    with open(module_name + ".ucl", "w") as f:
+        f.write(program)
+    return program
 
 def nextpc(pc, opcode):
     if opcode == 0x12:
