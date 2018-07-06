@@ -17,6 +17,7 @@
 #include <simplify.hpp>
 
 #include <ast.hpp>
+#include <ast/hash.hpp>
 
 namespace ila
 {
@@ -50,8 +51,13 @@ namespace ila
 
     class Uclid5Translator
     {
+    public:
+	typedef std::unordered_map<
+		const Node*, std::string,
+		decltype(&nodeHash), decltype(&nodeEqual)> expr_map_t;
     private:
         // name of the this translator.
+	expr_map_t exprmap;
         const std::string name;
         // pointer to the abstraction we are translating.
         boost::shared_ptr<Abstraction> abs;  
@@ -61,6 +67,7 @@ namespace ila
         std::shared_ptr<LiftingZ3Adapter> toZ3;
         std::shared_ptr<z3::solver> S;
         ITESimplifier simplifier;
+
 
     public:
         // constructor.
@@ -83,6 +90,8 @@ namespace ila
         NodeRef* simplify(NodeRef& n);
 	// translate an ila ast into the corresponding uclid5 program
 	std::string getTranslation(NodeRef& node);
+	// Define types
+
     };
 }
 

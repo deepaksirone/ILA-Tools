@@ -1,5 +1,6 @@
 #include <uclid5.hpp>
 #include <abstraction.hpp>
+#include <util.hpp>
 
 namespace ila
 {
@@ -74,7 +75,8 @@ namespace ila
     }
 
     Uclid5Translator::Uclid5Translator(const std::string& name_, boost::shared_ptr<Abstraction>& a)
-      : name(name_)
+      : exprmap(NUM_HASHTABLE_BUCKETS, nodeHash, nodeEqual)
+      ,	name(name_)
       , abs(a)
       , c_(new z3::context())
       , toZ3(new LiftingZ3Adapter(*c_))
@@ -84,7 +86,8 @@ namespace ila
     }
 
     Uclid5Translator::Uclid5Translator(const Uclid5Translator& ut)
-      : name(ut.name)
+      : exprmap(NUM_HASHTABLE_BUCKETS, nodeHash, nodeEqual)
+      , name(ut.name)
       , abs(ut.abs)
       , c_(ut.c_)
       , toZ3(new LiftingZ3Adapter(*c_))
@@ -188,7 +191,13 @@ namespace ila
 	std::string program;
 	program.clear();
 	nptr_t nptr(node.node);
-	auto n = nptr.get();
+	Node *n = nptr.get();
+	
+	auto pos = exprmap.find(n);
+	if (pos != exprmap.end()) {
+		//std::cout << "found in memo:" << pos->second  << "; for: " << *n << std::endl; 
+		return pos->second;
+	}
 
 	// handle the various types.
         const BoolVar* boolvar = NULL; 
@@ -210,7 +219,6 @@ namespace ila
         const FuncVar* funcvar = NULL;
 
         //log2("Z3ExprAdapter._populateExprMap") << "entering: " << *n << std::endl;
-
         //// booleans ////
         if ((boolvar = dynamic_cast<const BoolVar*>(n))) {
 		program = nptr->getName();
@@ -261,7 +269,8 @@ namespace ila
 			case BoolOp::EQUAL 	: { NodeRef a1(boolop->arg(0)); NodeRef a2(boolop->arg(1)); 
 						  program = "(" + getTranslation(a1) + " == " + getTranslation(a2) + ")"; break; }
  			case BoolOp::IF 	: { NodeRef a1(boolop->arg(0)); NodeRef a2(boolop->arg(1)); NodeRef a3(boolop->arg(2));
-						  program = "if (" + getTranslation(a1) + ")" + " then { " + getTranslation(a2) + " }" 							 +  " else { " + getTranslation(a3) + " }"; break;}
+						  program = "if (" + getTranslation(a1) + ")" + " then " + getTranslation(a2) 
+		 					  +  " else " + getTranslation(a3); break;}
 			case BoolOp::DISTINCT 	: { NodeRef a1(boolop->arg(0)); NodeRef a2(boolop->arg(1));
 						  program = "(" + getTranslation(a1) + " != " + getTranslation(a2) + ")"; break; }
 			default:	{ program = "Unsupported"; }
@@ -300,9 +309,15 @@ namespace ila
 			case BitvectorOp::COMPLEMENT	: { NodeRef a1(bvop->arg(0)); program = "~(" + getTranslation(a1) + ")"; break; }
 			case BitvectorOp::LROTATE	: { NodeRef a1(bvop->arg(0)); program = "lrot(" + getTranslation(a1) + ")"; break; }
 			case BitvectorOp::RROTATE	: { NodeRef a1(bvop->arg(0)); program = "rrot(" + getTranslation(a1) + ")"; break; }
-			case BitvectorOp::Z_EXT	: { NodeRef a1(bvop->arg(0)); program = "zeroext(" + getTranslation(a1) + ")"; break; }
-			case BitvectorOp::S_EXT	: { NodeRef a1(bvop->arg(0)); program = "signext(" + getTranslation(a1) + ")"; break; }
-			case BitvectorOp::EXTRACT	: { NodeRef a1(bvop->arg(0)); program = "extract(" + getTranslation(a1) + ")"; break; }
+			case BitvectorOp::Z_EXT	: { NodeRef a1(bvop->arg(0));
+						          // std::cout << "Number of ZeroExtend Args: " <<  std::to_string(bvop->nArgs()) << std::endl;
+							  program = "bv_zero_extend(" + std::to_string(bvop->param(0) - bvop->arg(0)->type.bitWidth) + ", " + getTranslation(a1) + ")"; break; }
+			case BitvectorOp::S_EXT	: { NodeRef a1(bvop->arg(0));							  
+							  //bvconst = dynamic_cast<const BitvectorConst*>(node.get());
+							  //std::cout << "Number of SignExtend Args: " <<  std::to_string(bvop->nArgs()) << std::endl;
+							  program = "bv_sign_extend(" + std::to_string(bvop->param(0) - bvop->arg(0)->type.bitWidth) + ", " + getTranslation(a1) + ")"; break; }
+			case BitvectorOp::EXTRACT	: { NodeRef a1(bvop->arg(0));
+							    program = "(" + getTranslation(a1) + ")[" + std::to_string(bvop->param(0)) + ":" + std::to_string(bvop->param(1)) + "]"; break; }
 			case BitvectorOp::ADD 	: { NodeRef a1(bvop->arg(0)); NodeRef a2(bvop->arg(1)); 
 						  program = "(" + getTranslation(a1) + " + " + getTranslation(a2) + ")"; break;}
 			case BitvectorOp::SUB 	: { NodeRef a1(bvop->arg(0)); NodeRef a2(bvop->arg(1)); 
@@ -340,8 +355,8 @@ namespace ila
 						  program = getTranslation(a1) + "[" + getTranslation(a2) + "]"; break;}
 			case BitvectorOp::READMEMBLOCK : { program = "READMEMBLOCKUnsupported"; break; }
 	 		case BitvectorOp::IF 	: { NodeRef a1(bvop->arg(0)); NodeRef a2(bvop->arg(1)); NodeRef a3(bvop->arg(2));
-						  program = "if (" + getTranslation(a1) + ")" + " then { " + getTranslation(a2) + " }" +
-						  " else { " + getTranslation(a3) + " }"; break;}
+						  program = "if (" + getTranslation(a1) + ")" + " then  " + getTranslation(a2) + 
+						  " else " + getTranslation(a3) ; break;}
 			case BitvectorOp::APPLY_FUNC :
 			default: 	{ program = "Unsupported"; }
 		}	  
@@ -379,9 +394,9 @@ namespace ila
 	     	switch(memop->getOp()) {
 			case MemOp::INVALID 	: { program = "InvalidMemOp"; break; }
 			case MemOp::STORE	: { NodeRef a1(memop->arg(0)); NodeRef a2(memop->arg(1)); NodeRef a3(memop->arg(2));
-						program = getTranslation(a1) + "[" + getTranslation(a2) + "->" + 
+						program = "(" + getTranslation(a1) + ")" + "[" + getTranslation(a2) + "->" + 
 							getTranslation(a3) + "]"; break; }
-			case MemOp::ITE 	: { NodeRef a1(memop->arg(0)); NodeRef a2(memop->arg(1)); NodeRef a3(memop->arg(2));						  	   program = "if (" + getTranslation(a1) + ")" + " then { " + getTranslation(a2) + " }" +" else { " + getTranslation(a3) + " }"; break;}
+			case MemOp::ITE 	: { NodeRef a1(memop->arg(0)); NodeRef a2(memop->arg(1)); NodeRef a3(memop->arg(2));						  	   program = "if (" + getTranslation(a1) + ")" + " then " + getTranslation(a2) +  +" else " + getTranslation(a3) ; break;}
 			case MemOp::STOREBLOCK :
 			default:	{ program = "InvalidMemOP"; }
 		}
@@ -407,7 +422,8 @@ namespace ila
             	log2("Z3ExprAdapter._populateExprMap") << *n << " --> " << r << std::endl;
             	exprmap.insert({n, r}); */
         }
-	
+	// std::cout << "\nNode Id: " + std::to_string(n->getId()) + "\n";
+	exprmap.insert({n, program});
 	return program;
     }	
 }
