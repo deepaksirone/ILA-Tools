@@ -3,6 +3,7 @@
 import sys
 import argparse
 import pickle
+import os
 
 import ila
 from uc8051ast import uc8051
@@ -160,7 +161,14 @@ def gen_uclid5(hexfile, enable_ps, filename):
         init_states = [ (p, tuple([])) for p in init_pcs ]
         init_state_names = [ state_to_name(pc_val, tuple([])) for pc_val in init_pcs ]
         state_map, state_edges, ret_set, state_to_nexts = get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states, romconst, next_exprs)
-        print generateUclid5Program("test1", model, uclid5, regs, memories, (state_map, state_edges, ret_set, state_to_nexts))
+        if not os.path.exists(hexfile + '_asts'):
+            os.makedirs(hexfile + '_asts')
+        for state in state_to_nexts.keys():
+            for reg in state_to_nexts[state].keys():
+                f = open(hexfile + '_asts/%s-%s' % (reg, state), 'w')
+                model.exportOne(state_to_nexts[state][reg], hexfile + '_asts/%s-%s' % (reg, state))
+            
+        
         with open('state_graph.obj', 'wt') as f:
             pickle.dump(init_state_names, f)
             pickle.dump(state_map, f)
@@ -172,7 +180,17 @@ def gen_uclid5(hexfile, enable_ps, filename):
             state_map = pickle.load(f)
             state_edges = pickle.load(f)
             ret_set = pickle.load(f)
+        
+        state_to_nexts = {}
+        states = regs + memories
+        for state in state_map.keys():
+            state_nexts = {}
+            for s in states:
+                state_nexts[s] = model.importOne(hexfile + '_asts/%s-%s' % (s, state))
+            state_to_nexts[state] = state_nexts
 
+    generateUclid5Program("test1", model, uclid5, regs, memories, (state_map, state_edges, ret_set, state_to_nexts))
+    
     reprs = merge_states(init_state_names, state_edges)
     for k in sorted(reprs.keys()):
         print '%-20s -> %-20s' % (k, reprs[k])
