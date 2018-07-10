@@ -1,0 +1,30 @@
+module main {
+	instance cpu_i_1 : cpu();
+	instance cpu_i_2 : cpu();
+	
+	init {
+	}
+
+	next {
+		next (cpu_i_1);
+		next (cpu_i_2);
+	}
+
+	invariant eq_mem: 
+		(forall (a : bv8) :: cpu_i_1.IRAM[a] == cpu_i_2.IRAM[a]);
+	invariant eq_PSW:
+		(cpu_i_1.PSW == cpu_i_2.PSW);
+	invariant eq_ACC:
+		(cpu_i_1.ACC == cpu_i_2.ACC);
+	invariant eq_PC:
+		(cpu_i_1.PC == cpu_i_2.PC);
+	invariant eq_SP:
+		(cpu_i_1.SP == cpu_i_2.SP);
+
+	control {
+		v = unroll(20);
+		check;
+		print_results;
+		v.print_cex(cpu_i_1.PC, cpu_i_2.PC, cpu_i_1.current_state, cpu_i_2.current_state);
+	}
+}
