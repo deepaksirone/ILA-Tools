@@ -12,6 +12,8 @@ module main {
 
 	invariant eq_mem: 
 		(forall (a : bv8) :: cpu_i_1.IRAM[a] == cpu_i_2.IRAM[a]);
+	invariant eq_inst:
+		(forall (a : bv16) :: ((0bv16 <= a && a <= 145bv16) ==> cpu_i_1.ROM[a] == cpu_i_2.ROM[a]));
 	invariant eq_PSW:
 		(cpu_i_1.PSW == cpu_i_2.PSW);
 	invariant eq_ACC:
@@ -20,9 +22,11 @@ module main {
 		(cpu_i_1.PC == cpu_i_2.PC);
 	invariant eq_SP:
 		(cpu_i_1.SP == cpu_i_2.SP);
+	invariant eq_state:
+		(cpu_i_1.current_state == cpu_i_2.current_state);
 
 	control {
-		v = unroll(20);
+		v = induction;
 		check;
 		print_results;
 		v.print_cex(cpu_i_1.PC, cpu_i_2.PC, cpu_i_1.current_state, cpu_i_2.current_state);
