@@ -355,8 +355,8 @@ namespace ila
 						  program = getTranslation(a1) + "[" + getTranslation(a2) + "]"; break;}
 			case BitvectorOp::READMEMBLOCK : { program = "READMEMBLOCKUnsupported"; break; }
 	 		case BitvectorOp::IF 	: { NodeRef a1(bvop->arg(0)); NodeRef a2(bvop->arg(1)); NodeRef a3(bvop->arg(2));
-						  program = "if (" + getTranslation(a1) + ")" + " then  " + getTranslation(a2) + 
-						  " else " + getTranslation(a3) ; break;}
+						  program = "( if (" + getTranslation(a1) + ")" + " then  " + getTranslation(a2) + 
+						  " else " + getTranslation(a3) + ")"; break;}
 			case BitvectorOp::APPLY_FUNC :
 			default: 	{ program = "Unsupported"; }
 		}	  
