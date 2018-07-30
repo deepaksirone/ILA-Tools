@@ -188,8 +188,7 @@ def gen_uclid5(hexfile, enable_ps, filename):
             for s in states:
                 state_nexts[s] = model.importOne(hexfile + '_asts/%s-%s' % (s, state))
             state_to_nexts[state] = state_nexts
-
-    generateUclid5Program("cpu", model, uclid5, regs, memories, data, (state_map, state_edges, ret_set, state_to_nexts))
+    generateUclid5Program(hexfile.split('.')[0], model, uclid5, regs, memories, data, (state_map, state_edges, ret_set, state_to_nexts))
     
     reprs = merge_states(init_state_names, state_edges)
     for k in sorted(reprs.keys()):
