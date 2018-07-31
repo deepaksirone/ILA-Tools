@@ -325,15 +325,17 @@ def generateNextBlock(model, uclid5, regs, memories, state_map, state_edges, sta
     pc_bitwidth = model.getreg('PC').type.bitwidth
     program += "\tcase\n"
     for state in state_edges.keys():
-        program += "\t(current_state == " + state + ") : {\n"  
+        program += "\t(current_state == " + state + ") : {\n"
+        program += "\t\tvar current_state_next : states_t;\n"
         program += "\t\tassume(PC == " + str(state_map[state][0]) + "bv" + str(pc_bitwidth) + ");\n"
         for s in state_updates:
             if s != uclid5.getTranslation(state_to_nexts[state][s]):
                 program += "\t\t" + s + "'\t= " + uclid5.getTranslation(state_to_nexts[state][s]) + ";\n"
         program += "\t\tassume("
         for nxt_s in state_edges[state][:-1]:
-            program += "current_state' == " + nxt_s + " || "
-        program += "current_state' == " + state_edges[state][-1] + ");\n"
+            program += "current_state_next == " + nxt_s + " || "
+        program += "current_state_next == " + state_edges[state][-1] + ");\n"
+        program += "\t\tcurrent_state' = current_state_next;\n"
         program += "\t}\n"
     program += "\tesac\n"
     program += "}\n"

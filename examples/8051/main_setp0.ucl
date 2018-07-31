@@ -1,6 +1,6 @@
 module main {
-	instance cpu_i_1 : cpu();
-	instance cpu_i_2 : cpu();
+	instance cpu_i_1 : set_p0();
+	instance cpu_i_2 : set_p0();
 	
 	init {
 
