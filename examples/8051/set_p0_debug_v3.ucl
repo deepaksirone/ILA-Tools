@@ -1,0 +1,80 @@
+module cpu {
+	var	PC	:	bv16;
+	var	ACC	:	bv8;
+	var	B	:	bv8;
+	var	PSW	:	bv8;
+	var	SP	:	bv8;
+	var	DPL	:	bv8;
+	var	DPH	:	bv8;
+	var	ROM	:	[bv16]bv8;
+	var	IRAM	:	[bv8]bv8;
+    var steps   : integer;
+	type states_t = enum { pc_0_stack_, pc_6_stack_, pc_9_stack_ };
+	var current_state	:	states_t;
+    init {
+        PC	= 0bv16;
+        ACC	= 0bv8;
+        B	= 0bv8;
+        PSW	= 0bv8;
+        SP	= 0bv8;
+        DPL	= 0bv8;
+        DPH	= 0bv8;
+        ROM[0bv16]	= 2bv8;
+        ROM[1bv16]	= 0bv8;
+        ROM[2bv16]	= 6bv8;
+        ROM[3bv16]	= 2bv8;
+        ROM[4bv16]	= 0bv8;
+        ROM[5bv16]	= 136bv8;
+        ROM[6bv16]	= 117bv8;
+        ROM[7bv16]	= 129bv8;
+        ROM[8bv16]	= 29bv8;
+        ROM[9bv16]	= 18bv8;
+        ROM[10bv16]	= 0bv8;
+        ROM[11bv16]	= 146bv8;
+        ROM[12bv16]	= 229bv8;
+        current_state	= pc_0_stack_;
+        steps = 0;
+    }
+    next {
+        case
+            (current_state == pc_0_stack_) : {
+                var current_state_next : states_t;
+                assume(PC == 0bv16);
+                PC'	= (ROM[(PC + 1bv16)] ++ ROM[(PC + 2bv16)]);
+                DPL'	= ((DPH ++ DPL))[7:0];
+                assume(current_state_next == pc_6_stack_);
+                current_state' = current_state_next;
+            }
+            (current_state == pc_6_stack_) : {
+                var current_state_next : states_t;
+                assume(PC == 6bv16);
+                PC'	= (PC + 3bv16);
+                SP'	= ROM[(PC + 2bv16)];
+                assume(current_state_next == pc_9_stack_);
+                current_state' = current_state_next;
+            }
+            (current_state == pc_9_stack_) : {
+                var current_state_next : states_t;
+                assume(PC == 9bv16);
+                PC'	= (ROM[(PC + 1bv16)] ++ ROM[(PC + 2bv16)]);
+                SP'	= (SP + 2bv8);
+                DPL'	= ((DPH ++ DPL))[7:0];
+                IRAM'	= ((IRAM)[(SP + 1bv8)->((PC + 3bv16))[7:0]])[((SP + 1bv8) + 1bv8)->((PC + 3bv16))[15:8]];
+                assume(current_state_next == pc_9_stack_);
+                current_state' = current_state_next;
+            }
+        esac
+        steps' = steps + 1;
+    }
+
+    //property p0_not_zero: (P0 == 0bv8);
+    property steps_3: PC != 9bv16;
+    control {
+        print_module;
+        v = unroll(2);
+        check;
+        print_results;
+        v.print_cex(PC, steps);
+    }
+}
+
