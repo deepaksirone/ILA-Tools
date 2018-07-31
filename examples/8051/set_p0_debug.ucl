@@ -26,7 +26,7 @@ module cpu {
 	var	ROM	:	[bv16]bv8;
 	var	IRAM	:	[bv8]bv8;
     var steps   : integer;
-	type states_t = enum {pc_4A_stack_,pc_7A_stack_,pc_83_stack_,pc_13_stack_,pc_1C_stack_,pc_49_stack_,pc_53_stack_,pc_47_stack_,pc_77_stack_,pc_40_stack_,pc_4C_stack_,pc_71_stack_,pc_26_stack_,pc_39_stack_,pc_6E_stack_,pc_3_stack_,pc_21_stack_,pc_86_stack_,pc_4E_stack_,pc_51_stack_,pc_55_stack_,pc_1F_stack_,pc_65_stack_,pc_C_stack_,pc_7D_stack_,pc_2E_stack_,pc_8F_stack_,pc_3D_stack_,pc_5B_stack_,pc_4F_stack_,pc_16_stack_,pc_59_stack_,pc_38_stack_,pc_95_stack_C,pc_36_stack_,pc_1A_stack_,pc_88_stack_,pc_5F_stack_,pc_6B_stack_,pc_58_stack_,pc_6_stack_,pc_32_stack_,pc_44_stack_,pc_28_stack_,pc_5D_stack_,pc_68_stack_,pc_2C_stack_,pc_62_stack_,pc_8C_stack_,pc_8A_stack_,pc_74_stack_,pc_E_stack_,pc_3B_stack_,pc_24_stack_,pc_80_stack_,pc_30_stack_,pc_42_stack_,pc_48_stack_,pc_10_stack_,pc_0_stack_,pc_3E_stack_,pc_29_stack_,pc_9_stack_,pc_18_stack_,pc_5A_stack_,pc_15_stack_,pc_27_stack_,pc_92_stack_C,pc_35_stack_,pc_25_stack_};
+	type states_t = enum { pc_0_stack_, pc_6_stack_, pc_9_stack_ };
 	var current_state	:	states_t;
     init {
         PC	= 0bv16;
@@ -226,7 +226,7 @@ module cpu {
                 SP'	= (SP + 2bv8);
                 DPL'	= ((DPH ++ DPL))[7:0];
                 IRAM'	= ((IRAM)[(SP + 1bv8)->((PC + 3bv16))[7:0]])[((SP + 1bv8) + 1bv8)->((PC + 3bv16))[15:8]];
-                assume(current_state' == pc_92_stack_C);
+                assume(current_state' == pc_9_stack_);
             }
         esac
         steps' = steps + 1;
