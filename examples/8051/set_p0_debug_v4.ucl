@@ -53,6 +53,7 @@ module set_p0 {
         IP  = 0bv8;
         XRAM_DATA_OUT   = 0bv8;
         XRAM_ADDR   = 0bv16;
+        ROM = const(0bv8, [bv16]bv8);
         ROM[0bv16]  = 2bv8;
         ROM[1bv16]  = 0bv8;
         ROM[2bv16]  = 6bv8;
@@ -203,7 +204,7 @@ module set_p0 {
         ROM[147bv16]    = 130bv8;
         ROM[148bv16]    = 0bv8;
         ROM[149bv16]    = 34bv8;
-        assume (forall (a : bv8) :: IRAM[a] == 0bv8);
+        IRAM = const(0bv8, [bv8]bv8);
         current_state   = pc_0_stack_;
         steps           = 0;
     }

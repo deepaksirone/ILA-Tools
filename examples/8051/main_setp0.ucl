@@ -17,6 +17,7 @@ module main {
 		next (cpu_i_2);
 	}
 
+    invariant trouble: false;
 	invariant neq_secret_data:
 		( (cpu_i_1.IRAM[29bv8] != cpu_i_2.IRAM[29bv8]));
 	invariant eq_inst:
