@@ -3,13 +3,9 @@ module main {
 	instance cpu_i_2 : set_p0();
 	
 	init {
-
-	        assume
-        	    (cpu_i_1.IRAM[28bv8] != cpu_i_2.IRAM[28bv8]);
-		assume
-	    	    (cpu_i_1.IRAM[29bv8] != cpu_i_2.IRAM[29bv8]);
-        	assume
-            	    (cpu_i_1.P0 == cpu_i_2.P0);
+        //assume (cpu_i_1.IRAM[28bv8] != cpu_i_2.IRAM[28bv8]);
+		//assume (cpu_i_1.IRAM[29bv8] != cpu_i_2.IRAM[29bv8]);
+        //assume (cpu_i_1.P0 == cpu_i_2.P0);
 	}
 
 	next {
@@ -17,6 +13,7 @@ module main {
 		next (cpu_i_2);
 	}
 
+    invariant trouble: false;
 	invariant neq_secret_data:
 		( (cpu_i_1.IRAM[29bv8] != cpu_i_2.IRAM[29bv8]));
 	invariant eq_inst:
@@ -54,3 +51,4 @@ module main {
 		v.print_cex(cpu_i_1.PC, cpu_i_2.PC, cpu_i_1.current_state, cpu_i_2.current_state);
 	}
 }
+

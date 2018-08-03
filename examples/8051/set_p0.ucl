@@ -203,7 +203,7 @@ init {
 	ROM[147bv16]	= 130bv8;
 	ROM[148bv16]	= 0bv8;
 	ROM[149bv16]	= 34bv8;
-    IRAM = const(0bv8, [bv8]bv8);
+    // IRAM = const(0bv8, [bv8]bv8);
 	current_state	= pc_0_stack_;
 }
 next {
