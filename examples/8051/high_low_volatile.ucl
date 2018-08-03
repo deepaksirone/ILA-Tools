@@ -244,938 +244,938 @@ next {
 	case
 	(current_state == pc_4A_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 74bv16);
+		assert (PC == 74bv16);
 		PC'	= ( if ((IRAM[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))] != 1bv8)) then  ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)])) else (PC + 2bv16));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))->(IRAM[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))] - 1bv8)];
-		assume(current_state_next == pc_4C_stack_ || current_state_next == pc_48_stack_);
+		current_state_next = (if (PC' == 76bv16) then pc_4C_stack_ else pc_48_stack_);
 		current_state' = current_state_next;
 	}
 	(current_state == pc_47_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 71bv16);
+		assert (PC == 71bv16);
 		PC'	= (PC + 1bv16);
 		ACC'	= 0bv8;
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_48_stack_);
+		current_state_next = pc_48_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_B2_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 178bv16);
+		assert (PC == 178bv16);
 		PC'	= (ROM[(PC + 1bv16)] ++ ROM[(PC + 2bv16)]);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_62_stack_);
+		current_state_next = pc_62_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_4C_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 76bv16);
+		assert (PC == 76bv16);
 		PC'	= (PC + 2bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))->ROM[(PC + 1bv16)]];
-		assume(current_state_next == pc_4E_stack_);
+		current_state_next = pc_4E_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_13_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 19bv16);
+		assert (PC == 19bv16);
 		PC'	= (PC + 2bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))->ROM[(PC + 1bv16)]];
-		assume(current_state_next == pc_15_stack_);
+		current_state_next = pc_15_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_6E_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 110bv16);
+		assert (PC == 110bv16);
 		PC'	= (PC + 3bv16);
 		P3'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_71_stack_);
+		current_state_next = pc_71_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_4E_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 78bv16);
+		assert (PC == 78bv16);
 		PC'	= (PC + 1bv16);
 		ACC'	= IRAM[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))];
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_4F_stack_);
+		current_state_next = pc_4F_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_9E_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 158bv16);
+		assert (PC == 158bv16);
 		PC'	= ( if ((ACC != 0bv8)) then  ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)])) else (PC + 2bv16));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_AB_stack_ || current_state_next == pc_A0_stack_);
+		current_state_next = (if (PC' == 171bv16) then pc_AB_stack_ else pc_A0_stack_);
 		current_state' = current_state_next;
 	}
 	(current_state == pc_A7_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 167bv16);
+		assert (PC == 167bv16);
 		PC'	= (PC + 2bv16);
 		ACC'	= (ACC + IRAM[ROM[(PC + 1bv16)]]);
 		PSW'	= ((((bv_zero_extend(1, ACC) + bv_zero_extend(1, IRAM[ROM[(PC + 1bv16)]])) + bv_zero_extend(8, 0bv1)))[8:8] ++ ((((bv_zero_extend(1, (ACC)[3:0]) + bv_zero_extend(1, (IRAM[ROM[(PC + 1bv16)]])[3:0])) + bv_zero_extend(4, 0bv1)))[4:4] ++ ((PSW)[5:3] ++ (( if (((((bv_sign_extend(1, ACC) + bv_sign_extend(1, IRAM[ROM[(PC + 1bv16)]])) + bv_zero_extend(8, 0bv1)))[8:8] != (((bv_sign_extend(1, ACC) + bv_sign_extend(1, IRAM[ROM[(PC + 1bv16)]])) + bv_zero_extend(8, 0bv1)))[7:7])) then  1bv1 else 0bv1) ++ (PSW)[1:0]))));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_A9_stack_);
+		current_state_next = pc_A9_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_A9_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 169bv16);
+		assert (PC == 169bv16);
 		PC'	= (PC + 2bv16);
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[ROM[(PC + 1bv16)]->ACC];
-		assume(current_state_next == pc_AB_stack_);
+		current_state_next = pc_AB_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_1F_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 31bv16);
+		assert (PC == 31bv16);
 		PC'	= (PC + 2bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))->ROM[(PC + 1bv16)]];
-		assume(current_state_next == pc_21_stack_);
+		current_state_next = pc_21_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_29_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 41bv16);
+		assert (PC == 41bv16);
 		PC'	= ( if ((IRAM[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))] != ROM[(PC + 1bv16)])) then  ((PC + 3bv16) + bv_sign_extend(8, ROM[(PC + 2bv16)])) else (PC + 3bv16));
 		PSW'	= (0bv1 ++ (PSW)[6:0]);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_2E_stack_ || current_state_next == pc_2C_stack_);
+		current_state_next = (if (PC' == 46bv16) then pc_2E_stack_ else pc_2C_stack_);
 		current_state' = current_state_next;
 	}
 	(current_state == pc_7D_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 125bv16);
+		assert (PC == 125bv16);
 		PC'	= (PC + 3bv16);
 		P2'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_80_stack_);
+		current_state_next = pc_80_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_4F_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 79bv16);
+		assert (PC == 79bv16);
 		PC'	= (PC + 2bv16);
 		ACC'	= (ACC | ROM[(PC + 1bv16)]);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_51_stack_);
+		current_state_next = pc_51_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_16_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 22bv16);
+		assert (PC == 22bv16);
 		PC'	= (PC + 2bv16);
 		ACC'	= (ACC | ROM[(PC + 1bv16)]);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_18_stack_);
+		current_state_next = pc_18_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_59_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 89bv16);
+		assert (PC == 89bv16);
 		PC'	= (PC + 1bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= ACC;
 		XRAM_ADDR'	= (DPH ++ DPL);
-		assume(current_state_next == pc_5A_stack_);
+		current_state_next = pc_5A_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_26_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 38bv16);
+		assert (PC == 38bv16);
 		PC'	= (PC + 1bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= ACC;
 		XRAM_ADDR'	= (0bv8 ++ IRAM[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))]);
-		assume(current_state_next == pc_27_stack_);
+		current_state_next = pc_27_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_1A_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 26bv16);
+		assert (PC == 26bv16);
 		PC'	= (PC + 2bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 2bv3))->ROM[(PC + 1bv16)]];
-		assume(current_state_next == pc_1C_stack_);
+		current_state_next = pc_1C_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_8B_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 139bv16);
+		assert (PC == 139bv16);
 		PC'	= (PC + 3bv16);
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[ROM[(PC + 1bv16)]->ROM[(PC + 2bv16)]];
-		assume(current_state_next == pc_8E_stack_);
+		current_state_next = pc_8E_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_44_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 68bv16);
+		assert (PC == 68bv16);
 		PC'	= (PC + 3bv16);
 		P2'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_47_stack_);
+		current_state_next = pc_47_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_9D_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 157bv16);
+		assert (PC == 157bv16);
 		PC'	= (PC + 1bv16);
 		ACC'	= IRAM[IRAM[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))]];
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_9E_stack_);
+		current_state_next = pc_9E_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_68_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 104bv16);
+		assert (PC == 104bv16);
 		PC'	= (PC + 3bv16);
 		P1'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_6B_stack_);
+		current_state_next = pc_6B_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_62_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 98bv16);
+		assert (PC == 98bv16);
 		PC'	= (PC + 3bv16);
 		P3'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_65_stack_);
+		current_state_next = pc_65_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_8E_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 142bv16);
+		assert (PC == 142bv16);
 		PC'	= (PC + 3bv16);
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[ROM[(PC + 1bv16)]->ROM[(PC + 2bv16)]];
-		assume(current_state_next == pc_91_stack_);
+		current_state_next = pc_91_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_80_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 128bv16);
+		assert (PC == 128bv16);
 		PC'	= (PC + 3bv16);
 		P1'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_83_stack_);
+		current_state_next = pc_83_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_42_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 66bv16);
+		assert (PC == 66bv16);
 		PC'	= (PC + 2bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))->ROM[(PC + 1bv16)]];
-		assume(current_state_next == pc_44_stack_);
+		current_state_next = pc_44_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_48_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 72bv16);
+		assert (PC == 72bv16);
 		PC'	= (PC + 1bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= ACC;
 		XRAM_ADDR'	= (0bv8 ++ IRAM[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))]);
-		assume(current_state_next == pc_49_stack_);
+		current_state_next = pc_49_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_0_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 0bv16);
+		assert (PC == 0bv16);
 		PC'	= (ROM[(PC + 1bv16)] ++ ROM[(PC + 2bv16)]);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_6_stack_);
+		current_state_next = pc_6_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_3E_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 62bv16);
+		assert (PC == 62bv16);
 		PC'	= (PC + 2bv16);
 		ACC'	= (ACC | ROM[(PC + 1bv16)]);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_40_stack_);
+		current_state_next = pc_40_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_9_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 9bv16);
+		assert (PC == 9bv16);
 		PC'	= (ROM[(PC + 1bv16)] ++ ROM[(PC + 2bv16)]);
 		SP'	= (SP + 2bv8);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= ((IRAM)[(SP + 1bv8)->((PC + 3bv16))[7:0]])[((SP + 1bv8) + 1bv8)->((PC + 3bv16))[15:8]];
-		assume(current_state_next == pc_B5_stack_C);
+		current_state_next = pc_B5_stack_C;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_18_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 24bv16);
+		assert (PC == 24bv16);
 		PC'	= ( if ((ACC == 0bv8)) then  ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)])) else (PC + 2bv16));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_1A_stack_ || current_state_next == pc_35_stack_);
+		current_state_next = (if (PC' == 26bv16) then pc_1A_stack_ else pc_35_stack_);
 		current_state' = current_state_next;
 	}
 	(current_state == pc_91_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 145bv16);
+		assert (PC == 145bv16);
 		PC'	= (PC + 1bv16);
 		PSW'	= (0bv1 ++ (PSW)[6:0]);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_92_stack_);
+		current_state_next = pc_92_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_35_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 53bv16);
+		assert (PC == 53bv16);
 		PC'	= (PC + 1bv16);
 		ACC'	= 0bv8;
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_36_stack_);
+		current_state_next = pc_36_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_25_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 37bv16);
+		assert (PC == 37bv16);
 		PC'	= (PC + 1bv16);
 		ACC'	= ROM[(bv_zero_extend(8, ACC) + (DPH ++ DPL))];
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_26_stack_);
+		current_state_next = pc_26_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_83_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 131bv16);
+		assert (PC == 131bv16);
 		PC'	= (PC + 3bv16);
 		P0'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_86_stack_);
+		current_state_next = pc_86_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_53_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 83bv16);
+		assert (PC == 83bv16);
 		PC'	= (PC + 2bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))->ROM[(PC + 1bv16)]];
-		assume(current_state_next == pc_55_stack_);
+		current_state_next = pc_55_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_77_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 119bv16);
+		assert (PC == 119bv16);
 		PC'	= (PC + 3bv16);
 		P0'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_7A_stack_);
+		current_state_next = pc_7A_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_71_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 113bv16);
+		assert (PC == 113bv16);
 		PC'	= (PC + 3bv16);
 		P2'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_74_stack_);
+		current_state_next = pc_74_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_AD_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 173bv16);
+		assert (PC == 173bv16);
 		PC'	= ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)]));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_91_stack_);
+		current_state_next = pc_91_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_AF_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 175bv16);
+		assert (PC == 175bv16);
 		PC'	= (PC + 3bv16);
 		P0'	= IRAM[ROM[(PC + 1bv16)]];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_B2_stack_);
+		current_state_next = pc_B2_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_39_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 57bv16);
+		assert (PC == 57bv16);
 		PC'	= ( if ((IRAM[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))] != 1bv8)) then  ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)])) else (PC + 2bv16));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))->(IRAM[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))] - 1bv8)];
-		assume(current_state_next == pc_3B_stack_ || current_state_next == pc_38_stack_);
+		current_state_next = (if (PC' == 59bv16) then pc_3B_stack_ else pc_38_stack_);
 		current_state' = current_state_next;
 	}
 	(current_state == pc_AB_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 171bv16);
+		assert (PC == 171bv16);
 		PC'	= (PC + 2bv16);
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[ROM[(PC + 1bv16)]->(IRAM[ROM[(PC + 1bv16)]] + 1bv8)];
-		assume(current_state_next == pc_AD_stack_);
+		current_state_next = pc_AD_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_B5_stack_C) : {
 		var current_state_next : states_t;
-		assume(PC == 181bv16);
+		assert (PC == 181bv16);
 		PC'	= (PC + 3bv16);
 		DPL'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_B8_stack_C);
+		current_state_next = pc_B8_stack_C;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_9A_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 154bv16);
+		assert (PC == 154bv16);
 		PC'	= (PC + 2bv16);
 		ACC'	= (ACC + ROM[(PC + 1bv16)]);
 		PSW'	= ((((bv_zero_extend(1, ACC) + bv_zero_extend(1, ROM[(PC + 1bv16)])) + bv_zero_extend(8, 0bv1)))[8:8] ++ ((((bv_zero_extend(1, (ACC)[3:0]) + bv_zero_extend(1, (ROM[(PC + 1bv16)])[3:0])) + bv_zero_extend(4, 0bv1)))[4:4] ++ ((PSW)[5:3] ++ (( if (((((bv_sign_extend(1, ACC) + bv_sign_extend(1, ROM[(PC + 1bv16)])) + bv_zero_extend(8, 0bv1)))[8:8] != (((bv_sign_extend(1, ACC) + bv_sign_extend(1, ROM[(PC + 1bv16)])) + bv_zero_extend(8, 0bv1)))[7:7])) then  1bv1 else 0bv1) ++ (PSW)[1:0]))));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_9C_stack_);
+		current_state_next = pc_9C_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_21_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 33bv16);
+		assert (PC == 33bv16);
 		PC'	= (PC + 3bv16);
 		P2'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_24_stack_);
+		current_state_next = pc_24_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_A5_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 165bv16);
+		assert (PC == 165bv16);
 		PC'	= (PC + 1bv16);
 		ACC'	= IRAM[IRAM[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))]];
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_A6_stack_);
+		current_state_next = pc_A6_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_38_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 56bv16);
+		assert (PC == 56bv16);
 		PC'	= (PC + 1bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[IRAM[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))]->ACC];
-		assume(current_state_next == pc_39_stack_);
+		current_state_next = pc_39_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_36_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 54bv16);
+		assert (PC == 54bv16);
 		PC'	= (PC + 2bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))->ROM[(PC + 1bv16)]];
-		assume(current_state_next == pc_38_stack_);
+		current_state_next = pc_38_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_5F_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 95bv16);
+		assert (PC == 95bv16);
 		PC'	= (ROM[(PC + 1bv16)] ++ ROM[(PC + 2bv16)]);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_3_stack_);
+		current_state_next = pc_3_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_58_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 88bv16);
+		assert (PC == 88bv16);
 		PC'	= (PC + 1bv16);
 		ACC'	= 0bv8;
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_59_stack_);
+		current_state_next = pc_59_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_A6_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 166bv16);
+		assert (PC == 166bv16);
 		PC'	= (PC + 1bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 7bv3))->ACC];
-		assume(current_state_next == pc_A7_stack_);
+		current_state_next = pc_A7_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_6_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 6bv16);
+		assert (PC == 6bv16);
 		PC'	= (PC + 3bv16);
 		SP'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_9_stack_);
+		current_state_next = pc_9_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_5B_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 91bv16);
+		assert (PC == 91bv16);
 		PC'	= ( if ((IRAM[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))] != 1bv8)) then  ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)])) else (PC + 2bv16));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))->(IRAM[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))] - 1bv8)];
-		assume(current_state_next == pc_59_stack_ || current_state_next == pc_5D_stack_);
+		current_state_next = (if (PC' == 89bv16) then pc_59_stack_ else pc_5D_stack_);
 		current_state' = current_state_next;
 	}
 	(current_state == pc_30_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 48bv16);
+		assert (PC == 48bv16);
 		PC'	= ( if ((IRAM[(0bv3 ++ ((PSW)[4:3] ++ 2bv3))] != 1bv8)) then  ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)])) else (PC + 2bv16));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 2bv3))->(IRAM[(0bv3 ++ ((PSW)[4:3] ++ 2bv3))] - 1bv8)];
-		assume(current_state_next == pc_32_stack_ || current_state_next == pc_24_stack_);
+		current_state_next = (if (PC' == 50bv16) then pc_32_stack_ else pc_24_stack_);
 		current_state' = current_state_next;
 	}
 	(current_state == pc_32_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 50bv16);
+		assert (PC == 50bv16);
 		PC'	= (PC + 3bv16);
 		P2'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_35_stack_);
+		current_state_next = pc_35_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_A0_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 160bv16);
+		assert (PC == 160bv16);
 		PC'	= (PC + 2bv16);
 		ACC'	= IRAM[ROM[(PC + 1bv16)]];
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_A2_stack_);
+		current_state_next = pc_A2_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_B8_stack_C) : {
 		var current_state_next : states_t;
-		assume(PC == 184bv16);
+		assert (PC == 184bv16);
 		PC'	= (IRAM[SP] ++ IRAM[(SP - 1bv8)]);
 		SP'	= (SP - 2bv8);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_C_stack_);
+		current_state_next = pc_C_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_40_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 64bv16);
+		assert (PC == 64bv16);
 		PC'	= ( if ((ACC == 0bv8)) then  ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)])) else (PC + 2bv16));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_4C_stack_ || current_state_next == pc_42_stack_);
+		current_state_next = (if (PC' == 76bv16) then pc_4C_stack_ else pc_42_stack_);
 		current_state' = current_state_next;
 	}
 	(current_state == pc_3_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 3bv16);
+		assert (PC == 3bv16);
 		PC'	= (ROM[(PC + 1bv16)] ++ ROM[(PC + 2bv16)]);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_88_stack_);
+		current_state_next = pc_88_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_51_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 81bv16);
+		assert (PC == 81bv16);
 		PC'	= ( if ((ACC == 0bv8)) then  ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)])) else (PC + 2bv16));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_53_stack_ || current_state_next == pc_5F_stack_);
+		current_state_next = (if (PC' == 83bv16) then pc_53_stack_ else pc_5F_stack_);
 		current_state' = current_state_next;
 	}
 	(current_state == pc_65_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 101bv16);
+		assert (PC == 101bv16);
 		PC'	= (PC + 3bv16);
 		P2'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_68_stack_);
+		current_state_next = pc_68_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_15_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 21bv16);
+		assert (PC == 21bv16);
 		PC'	= (PC + 1bv16);
 		ACC'	= IRAM[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))];
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_16_stack_);
+		current_state_next = pc_16_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_3D_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 61bv16);
+		assert (PC == 61bv16);
 		PC'	= (PC + 1bv16);
 		ACC'	= IRAM[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))];
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_3E_stack_);
+		current_state_next = pc_3E_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_27_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 39bv16);
+		assert (PC == 39bv16);
 		PC'	= (PC + 1bv16);
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_28_stack_);
+		current_state_next = pc_28_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_A4_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 164bv16);
+		assert (PC == 164bv16);
 		PC'	= (PC + 1bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))->ACC];
-		assume(current_state_next == pc_A5_stack_);
+		current_state_next = pc_A5_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_A2_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 162bv16);
+		assert (PC == 162bv16);
 		PC'	= (PC + 2bv16);
 		ACC'	= (ACC + ROM[(PC + 1bv16)]);
 		PSW'	= ((((bv_zero_extend(1, ACC) + bv_zero_extend(1, ROM[(PC + 1bv16)])) + bv_zero_extend(8, 0bv1)))[8:8] ++ ((((bv_zero_extend(1, (ACC)[3:0]) + bv_zero_extend(1, (ROM[(PC + 1bv16)])[3:0])) + bv_zero_extend(4, 0bv1)))[4:4] ++ ((PSW)[5:3] ++ (( if (((((bv_sign_extend(1, ACC) + bv_sign_extend(1, ROM[(PC + 1bv16)])) + bv_zero_extend(8, 0bv1)))[8:8] != (((bv_sign_extend(1, ACC) + bv_sign_extend(1, ROM[(PC + 1bv16)])) + bv_zero_extend(8, 0bv1)))[7:7])) then  1bv1 else 0bv1) ++ (PSW)[1:0]))));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_A4_stack_);
+		current_state_next = pc_A4_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_88_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 136bv16);
+		assert (PC == 136bv16);
 		PC'	= (PC + 3bv16);
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[ROM[(PC + 1bv16)]->ROM[(PC + 2bv16)]];
-		assume(current_state_next == pc_8B_stack_);
+		current_state_next = pc_8B_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_28_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 40bv16);
+		assert (PC == 40bv16);
 		PC'	= (PC + 1bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))->(IRAM[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))] + 1bv8)];
-		assume(current_state_next == pc_29_stack_);
+		current_state_next = pc_29_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_9C_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 156bv16);
+		assert (PC == 156bv16);
 		PC'	= (PC + 1bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))->ACC];
-		assume(current_state_next == pc_9D_stack_);
+		current_state_next = pc_9D_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_24_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 36bv16);
+		assert (PC == 36bv16);
 		PC'	= (PC + 1bv16);
 		ACC'	= 0bv8;
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_25_stack_);
+		current_state_next = pc_25_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_E_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 14bv16);
+		assert (PC == 14bv16);
 		PC'	= ( if ((ACC == 0bv8)) then  ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)])) else (PC + 2bv16));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_10_stack_ || current_state_next == pc_13_stack_);
+		current_state_next = (if (PC' == 16bv16) then pc_10_stack_ else pc_13_stack_);
 		current_state' = current_state_next;
 	}
 	(current_state == pc_2E_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 46bv16);
+		assert (PC == 46bv16);
 		PC'	= ( if ((IRAM[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))] != 1bv8)) then  ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)])) else (PC + 2bv16));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))->(IRAM[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))] - 1bv8)];
-		assume(current_state_next == pc_30_stack_ || current_state_next == pc_24_stack_);
+		current_state_next = (if (PC' == 48bv16) then pc_30_stack_ else pc_24_stack_);
 		current_state' = current_state_next;
 	}
 	(current_state == pc_7A_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 122bv16);
+		assert (PC == 122bv16);
 		PC'	= (PC + 3bv16);
 		P3'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_7D_stack_);
+		current_state_next = pc_7D_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_1C_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 28bv16);
+		assert (PC == 28bv16);
 		PC'	= (PC + 3bv16);
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_1F_stack_);
+		current_state_next = pc_1F_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_49_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 73bv16);
+		assert (PC == 73bv16);
 		PC'	= (PC + 1bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))->(IRAM[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))] + 1bv8)];
-		assume(current_state_next == pc_4A_stack_);
+		current_state_next = pc_4A_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_94_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 148bv16);
+		assert (PC == 148bv16);
 		PC'	= (PC + 2bv16);
 		ACC'	= ((ACC - IRAM[ROM[(PC + 1bv16)]]) + bv_sign_extend(7, (PSW)[7:7]));
 		PSW'	= (( if ((ACC < (IRAM[ROM[(PC + 1bv16)]] + bv_zero_extend(7, (PSW)[7:7])))) then  1bv1 else 0bv1) ++ (( if ((bv_zero_extend(1, (ACC)[3:0]) < (bv_zero_extend(1, (IRAM[ROM[(PC + 1bv16)]])[3:0]) + bv_zero_extend(4, (PSW)[7:7])))) then  1bv1 else 0bv1) ++ ((PSW)[5:3] ++ (( if (((((bv_sign_extend(1, ACC) - bv_sign_extend(1, IRAM[ROM[(PC + 1bv16)]])) + bv_sign_extend(8, (PSW)[7:7])))[8:8] != (((bv_sign_extend(1, ACC) - bv_sign_extend(1, IRAM[ROM[(PC + 1bv16)]])) + bv_sign_extend(8, (PSW)[7:7])))[7:7])) then  1bv1 else 0bv1) ++ (PSW)[1:0]))));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_96_stack_);
+		current_state_next = pc_96_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_86_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 134bv16);
+		assert (PC == 134bv16);
 		PC'	= ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)]));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_86_stack_);
+		current_state_next = pc_86_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_55_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 85bv16);
+		assert (PC == 85bv16);
 		PC'	= (PC + 3bv16);
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_58_stack_);
+		current_state_next = pc_58_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_C_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 12bv16);
+		assert (PC == 12bv16);
 		PC'	= (PC + 2bv16);
 		ACC'	= DPL;
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_E_stack_);
+		current_state_next = pc_E_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_74_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 116bv16);
+		assert (PC == 116bv16);
 		PC'	= (PC + 3bv16);
 		P1'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_77_stack_);
+		current_state_next = pc_77_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_92_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 146bv16);
+		assert (PC == 146bv16);
 		PC'	= (PC + 2bv16);
 		ACC'	= IRAM[ROM[(PC + 1bv16)]];
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_94_stack_);
+		current_state_next = pc_94_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_6B_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 107bv16);
+		assert (PC == 107bv16);
 		PC'	= (PC + 3bv16);
 		P0'	= ROM[(PC + 2bv16)];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_6E_stack_);
+		current_state_next = pc_6E_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_98_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 152bv16);
+		assert (PC == 152bv16);
 		PC'	= (PC + 2bv16);
 		ACC'	= IRAM[ROM[(PC + 1bv16)]];
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_9A_stack_);
+		current_state_next = pc_9A_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_5D_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 93bv16);
+		assert (PC == 93bv16);
 		PC'	= ( if ((IRAM[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))] != 1bv8)) then  ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)])) else (PC + 2bv16));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))->(IRAM[(0bv3 ++ ((PSW)[4:3] ++ 1bv3))] - 1bv8)];
-		assume(current_state_next == pc_59_stack_ || current_state_next == pc_5F_stack_);
+		current_state_next = (if (PC' == 89bv16) then pc_59_stack_ else pc_5F_stack_);
 		current_state' = current_state_next;
 	}
 	(current_state == pc_2C_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 44bv16);
+		assert (PC == 44bv16);
 		PC'	= (PC + 2bv16);
 		P2'	= (P2 + 1bv8);
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_2E_stack_);
+		current_state_next = pc_2E_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_96_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 150bv16);
+		assert (PC == 150bv16);
 		PC'	= ( if (((PSW)[7:7] == 0bv1)) then  ((PC + 2bv16) + bv_sign_extend(8, ROM[(PC + 1bv16)])) else (PC + 2bv16));
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_AF_stack_ || current_state_next == pc_98_stack_);
+		current_state_next = (if (PC' == 175bv16) then pc_AF_stack_ else pc_98_stack_);
 		current_state' = current_state_next;
 	}
 	(current_state == pc_3B_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 59bv16);
+		assert (PC == 59bv16);
 		PC'	= (PC + 2bv16);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
 		IRAM'	= (IRAM)[(0bv3 ++ ((PSW)[4:3] ++ 0bv3))->ROM[(PC + 1bv16)]];
-		assume(current_state_next == pc_3D_stack_);
+		current_state_next = pc_3D_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_10_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 16bv16);
+		assert (PC == 16bv16);
 		PC'	= (ROM[(PC + 1bv16)] ++ ROM[(PC + 2bv16)]);
 		DPL'	= ((DPH ++ DPL))[7:0];
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_3_stack_);
+		current_state_next = pc_3_stack_;
 		current_state' = current_state_next;
 	}
 	(current_state == pc_5A_stack_) : {
 		var current_state_next : states_t;
-		assume(PC == 90bv16);
+		assert (PC == 90bv16);
 		PC'	= (PC + 1bv16);
 		XRAM_DATA_OUT'	= 0bv8;
 		XRAM_ADDR'	= 0bv16;
-		assume(current_state_next == pc_5B_stack_);
+		current_state_next = pc_5B_stack_;
 		current_state' = current_state_next;
 	}
 	esac

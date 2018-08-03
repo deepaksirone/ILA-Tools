@@ -322,6 +322,16 @@ def generateInitBlock(model, regs, memories, romdata):
     return program
 
 def generateNextBlock(model, uclid5, regs, memories, state_map, state_edges, state_to_nexts):
+    def pcToStateITE(edges):
+        assert len(edges) > 0
+        if len(edges) == 1:
+            return edges[0]
+        else:
+            subexpr = pcToStateITE(edges[1:])
+            next_state = edges[0]
+            next_pc = "%sbv%d" % (str(state_map[next_state][0]), pc_bitwidth)
+            return "(if (PC' == %s) then %s else %s)" % (next_pc, next_state, subexpr)
+
     program = "next {\n"
     state_updates = regs + memories
     pc_bitwidth = model.getreg('PC').type.bitwidth
@@ -329,14 +339,15 @@ def generateNextBlock(model, uclid5, regs, memories, state_map, state_edges, sta
     for state in state_edges.keys():
         program += "\t(current_state == " + state + ") : {\n"
         program += "\t\tvar current_state_next : states_t;\n"
-        program += "\t\tassume(PC == " + str(state_map[state][0]) + "bv" + str(pc_bitwidth) + ");\n"
+        program += "\t\tassert (PC == " + str(state_map[state][0]) + "bv" + str(pc_bitwidth) + ");\n"
         for s in state_updates:
             if s != uclid5.getTranslation(state_to_nexts[state][s]):
                 program += "\t\t" + s + "'\t= " + uclid5.getTranslation(state_to_nexts[state][s]) + ";\n"
-        program += "\t\tassume("
-        for nxt_s in state_edges[state][:-1]:
-            program += "current_state_next == " + nxt_s + " || "
-        program += "current_state_next == " + state_edges[state][-1] + ");\n"
+        #program += "\t\tassume ("
+        #for nxt_s in state_edges[state][:-1]:
+        #    program += "current_state_next == " + nxt_s + " || "
+        #program += "current_state_next == " + state_edges[state][-1] + ");\n"
+        program += "\t\tcurrent_state_next = %s;\n" % pcToStateITE(state_edges[state])
         program += "\t\tcurrent_state' = current_state_next;\n"
         program += "\t}\n"
     program += "\tesac\n"
