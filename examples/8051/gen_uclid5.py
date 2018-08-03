@@ -309,9 +309,11 @@ def generateInitBlock(model, regs, memories, romdata):
         addrw = model.getmem(mem).type.addrwidth
         dataw = model.getmem(mem).type.datawidth
         if mem == 'ROM':
+            program += "\tROM = const(0bv%d, [bv%d]bv%d);\n" % (dataw, addrw, dataw)
             for a, d in enumerate(romdata):
                 program += "\tROM[" + str(a) + "bv" + str(addrw) + "]\t= " + str(d) + "bv" + str(dataw) + ";\n"
-        else:
+        # Skipping over initialization of IRAM
+        elif mem != 'IRAM':
             for addr in range(0, 2 ** addrw):
                 program += "\t" + mem + "[" + str(addr) + "bv" + str(addrw) + "]\t=" + "0bv" + str(dataw) + ";\n"
 
