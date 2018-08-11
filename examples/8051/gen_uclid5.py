@@ -190,25 +190,87 @@ def gen_uclid5(hexfile, enable_ps, filename):
             state_to_nexts[state] = state_nexts
     generateUclid5Program(hexfile.split('.')[0], model, uclid5, regs, memories, data, (state_map, state_edges, ret_set, state_to_nexts))
     
-    reprs = merge_states(init_state_names, state_edges)
+    reprs, blocks = merge_states(init_state_names, state_edges)
     for k in sorted(reprs.keys()):
         print '%-20s -> %-20s' % (k, reprs[k])
 
+#def merge_states(init_state_names, state_edges):
+#    reprs = {}
+#    visited = set()
+#    def visit(st, rep):
+#        if st in visited: return
+#        else: visited.add(st)
+#
+#        next_states = state_edges[st]
+#        reprs[st] = rep
+#        if len(next_states) == 1:
+#            visit(next_states[0], rep)
+#        else:
+#            for nxt_st in next_states: visit(nxt_st, nxt_st)
+#    for ist in init_state_names: visit(ist, ist)
+#    return reprs
+#
+
+
 def merge_states(init_state_names, state_edges):
     reprs = {}
-    visited = set()
-    def visit(st, rep):
-        if st in visited: return
-        else: visited.add(st)
+    visited_label = set()
+    visited_repr = set()
+    labels = {} #State to label. Label can be one of {0 for entry, 1 for exit, both or neither}
+    for state in state_edges.keys():
+        labels[state] = set()
+        if state in init_state_names:
+            labels[state].add(0)
+            reprs[state] = state
 
-        next_states = state_edges[st]
-        reprs[st] = rep
-        if len(next_states) == 1:
-            visit(next_states[0], rep)
+    def label(state):
+        if state in visited_label:
+            labels[state].add(0)
+            return
         else:
-            for nxt_st in next_states: visit(nxt_st, nxt_st)
-    for ist in init_state_names: visit(ist, ist)
-    return reprs
+            visited_label.add(state)
+            next_states = state_edges[state]
+            if len(next_states) >= 2:
+                labels[state].add(1)
+                for state in next_states:
+                    labels[state].add(0)
+                    label(state)
+            else:
+                label(next_states[0])
+    
+    def compute_repr(state, prev_state):
+        if state in visited_repr:
+            return
+        else:
+            visited_repr.add(state)
+            if 0 in labels[state]:
+                reprs[state] = (state, 1)
+            if 0 not in labels[state] and 1 in labels[state]:
+                reprs[state] = (prev_state[0], prev_state[1] + 1)
+            if len(labels[state]) == 0:
+                reprs[state] = (prev_state[0], prev_state[1] + 1)
+            for s in state_edges[state]: compute_repr(s, reprs[state])
+
+    for state in init_state_names: label(state)
+    for state in init_state_names: compute_repr(state, None)
+
+    basic_blocks = set()
+    for state in state_edges.keys():
+        basic_blocks.add(reprs[state][0])
+
+    blocks = {block: [] for block in basic_blocks}
+    for block in blocks.keys():
+        for state in reprs.keys():
+            if reprs[state][0] == block:
+                blocks[block].append((state, reprs[state][1]))
+        blocks[block].sort(key=lambda x: x[1])
+
+    print blocks
+    return (reprs, blocks)
+    
+                            
+
+
 
 def get_cfg(uclid5, rom, pc, pc_next, inst_next, init_states, romconst, next_exprs):
     stack = init_states
