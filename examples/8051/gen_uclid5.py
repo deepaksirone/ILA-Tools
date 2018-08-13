@@ -397,11 +397,11 @@ def generateNextBlock(model, uclid5, regs, memories, state_map, state_edges, sta
                 l.add(s)
         return l
 
-    def replaceVars(s, used, block_var_map, active_vars):
+    def replaceVars(s, used, active_vars):
         for var in active_vars:
-            if var in s and used[var] == True:
-                s = s.replace(var, block_var_map[var])
-                print s
+            if var in s and used[var][0] == True:
+                s = s.replace(var, "block_%s_%s" % (var, used[var][1]))
+
         return s
 
     def pcToStateITE(edges):
@@ -420,16 +420,17 @@ def generateNextBlock(model, uclid5, regs, memories, state_map, state_edges, sta
         program += "\t\tvar current_state_next : states_t;\n"
         block_var_map = {}
         used = {}
-        for var in active_vars:
-            if var in memories:
-                mem_addrwidth = model.getmem(var).type.addrwidth
-                mem_datawidth = model.getmem(var).type.datawidth
-                program += "\t\tvar block_%s : [bv%s]bv%s;\n" % (var, str(mem_addrwidth), str(mem_datawidth))
-            else:
-                reg_bitwidth = model.getreg(var).type.bitwidth
-                program += "\t\tvar block_%s : bv%s;\n" % (var, str(reg_bitwidth))
-            block_var_map[var] = ''
-            used[var] = False
+        for state in block:
+            for var in active_vars:
+                if var in memories:
+                    mem_addrwidth = model.getmem(var).type.addrwidth
+                    mem_datawidth = model.getmem(var).type.datawidth
+                    program += "\t\tvar block_%s_%s : [bv%s]bv%s;\n" % (var, state[0], str(mem_addrwidth), str(mem_datawidth))
+                else:
+                    reg_bitwidth = model.getreg(var).type.bitwidth
+                    program += "\t\tvar block_%s_%s : bv%s;\n" % (var, state[0], str(reg_bitwidth))
+                block_var_map[var] = ''
+                used[var] = (False, '')
         program += "\t\tassume (PC == %sbv%s);\n" % (str(state_map[block_repr][0]), str(pc_bitwidth))
 
         (entry_state, o) = block[0]
@@ -438,21 +439,23 @@ def generateNextBlock(model, uclid5, regs, memories, state_map, state_edges, sta
         
         # Generate all assignments using the block vars and then assign the real vars to them
         for (state, order) in block:
-            for var in active_vars_state(state):
+            state_vars = active_vars_state(state)
+            for var in active_vars:
                 s = uclid5.getTranslation(state_to_nexts[state][var])
                 
                 if len(block) == 1:
                     program += "\t\t%s' = %s;\n" % (var, s)
                 elif state == entry_state:
-                    program += "\t\tblock_%s = %s;\n" % (var, s)
-                    block_var_map[var] = s
-                    used[var] = True
+                    if var in state_vars:
+                        program += "\t\tblock_%s_%s = %s;\n" % (var, state, s)
+                        used[var] = (True, state)
 
                 elif state == exit_state:
-                    program += "\t\t%s' = %s;\n" % (var, replaceVars(s, used, block_var_map, active_vars))
+                    program += "\t\t%s' = %s;\n" % (var, replaceVars(s, used, active_vars))
                 else:
-                    block_var_map[var] = replaceVars(s, used, block_var_map, active_vars)
-                    used[var] = True
+                    if var in state_vars:
+                        program += "\t\tblock_%s_%s = %s;\n" % (var, state,  replaceVars(s, used, active_vars))
+                        used[var] = (True, state)
 
         program += "\t\tcurrent_state_next = %s;\n" % pcToStateITE(state_edges[state])
         program += "\t\tcurrent_state' = current_state_next;\n"
